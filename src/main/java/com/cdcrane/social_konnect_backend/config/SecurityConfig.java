@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,12 +22,23 @@ public class SecurityConfig {
     {
 
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/post/hello").permitAll() // Permitted or specific routes first.
+                .requestMatchers("/api/post/hello", "/error").permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
 
 
         http.formLogin(Customizer.withDefaults());
-        http.httpBasic(Customizer.withDefaults());
+
+        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomAuthEntryPoint()));
+        http.exceptionHandling(ehc -> ehc.authenticationEntryPoint(new CustomAuthEntryPoint()));
+
+        http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
+
+        // Keeps sessions alive, with basic auth this is disabled by default, later requests will stay authed if you pass the session ID.
+        http.sessionManagement(session -> {
+            session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+            session.maximumSessions(1);
+        });
+
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
