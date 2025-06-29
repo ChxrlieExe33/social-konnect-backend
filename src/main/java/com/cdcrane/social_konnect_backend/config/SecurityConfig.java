@@ -1,5 +1,8 @@
 package com.cdcrane.social_konnect_backend.config;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,10 +20,10 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception
     {
 
-        // Changed to .permitAll() so no auth required
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/post/hidden_hello").authenticated()
-			    .requestMatchers("/api/post/hello").permitAll());
+                .requestMatchers("/api/post/hello").permitAll() // Permitted or specific routes first.
+                .anyRequest().authenticated()); // .anyRequest always goes last.
+
 
         http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());

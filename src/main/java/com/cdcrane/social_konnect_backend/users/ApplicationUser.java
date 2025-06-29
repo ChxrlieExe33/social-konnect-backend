@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.roles.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,9 @@ public class ApplicationUser {
 
     private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JsonIgnoreProperties("users")
     private List<Role> roles;
 
 }

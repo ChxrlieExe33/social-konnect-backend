@@ -1,6 +1,8 @@
 package com.cdcrane.social_konnect_backend.roles;
 
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +20,8 @@ public class Role {
 
     private String authority;
 
-    @ManyToMany(mappedBy = "roles")
+    @JsonIgnoreProperties("roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     private List<ApplicationUser> users;
 
 }
