@@ -5,7 +5,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,13 +24,19 @@ public class SecurityConfig {
     {
 
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/post/hello", "/error").permitAll() // Permitted or specific routes first.
+                .requestMatchers("/api/post/hello", "/error", "/auth").permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
 
 
-        http.formLogin(Customizer.withDefaults());
+        /* This is for using auth controller instead of basic. (See commented code in AuthController.java)
+        http.formLogin(hbc -> hbc.disable());
 
-        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomAuthEntryPoint()));
+        http.httpBasic(hbc -> hbc.disable());
+        */
+
+        http.formLogin(Customizer.withDefaults());
+        http.httpBasic(Customizer.withDefaults());
+
         http.exceptionHandling(ehc -> ehc.authenticationEntryPoint(new CustomAuthEntryPoint()));
 
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
@@ -42,6 +50,15 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
+
+    /* This is for using auth controller instead of basic. (See commented code in AuthController.java)
+    @Bean
+    public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authConfig) throws Exception {
+
+        Return authConfig.getAuthenticationManager();
+
+    }
+    */
 
     @Bean
     public PasswordEncoder passwordEncoder() {

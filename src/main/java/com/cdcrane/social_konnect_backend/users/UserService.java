@@ -42,7 +42,8 @@ public class UserService implements UserUseCase {
 
         return new User(u.getUsername(), u.getPassword(),
                 u.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList()));
+                        .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
+                        .collect(Collectors.toList()));
 
     }
 
