@@ -11,6 +11,10 @@ The technologies I'm using to build it are the following:
 - Spring-security
 - ...
 
+# Notes
+
+- I am using this project to learn spring security, I won't be progressing the functionality of the app until I can create a JWT based authentication system.
+
 # Main goals for the project
 
 - Users can have 0-N posts, which in the beginning will have one photo per post, I will add video support later.
