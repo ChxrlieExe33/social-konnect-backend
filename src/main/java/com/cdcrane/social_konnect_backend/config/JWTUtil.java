@@ -1,9 +1,10 @@
 package com.cdcrane.social_konnect_backend.config;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -37,6 +38,23 @@ public class JWTUtil {
                 .compact();
 
         return jwt;
+    }
+
+    public Claims validateJwt(String jwt){
+
+        SecretKey secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+        try {
+
+            Claims claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwt).getPayload();
+
+            return claims;
+
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid JWT token");
+        }
+
+
     }
 
 }

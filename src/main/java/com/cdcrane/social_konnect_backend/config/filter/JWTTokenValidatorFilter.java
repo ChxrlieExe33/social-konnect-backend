@@ -1,13 +1,49 @@
 package com.cdcrane.social_konnect_backend.config.filter;
 
+import com.cdcrane.social_konnect_backend.config.JWTUtil;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
-    @Override
-    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, jakarta.servlet.FilterChain filterChain) throws jakarta.servlet.ServletException, java.io.IOException {
+    private final JWTUtil jwtUtil;
 
+    public JWTTokenValidatorFilter(JWTUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        String jwt = request.getHeader("Authorization");
+
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+
+            String authToken = jwt.substring(7);
+
+            Claims claims = jwtUtil.validateJwt(authToken);
+
+            String username = claims.get("username", String.class);
+            String authorities = claims.get("authorities", String.class);
+
+            // This constructor automatically sets authenticated to true, so no need to do it manually.
+            Authentication auth = new UsernamePasswordAuthenticationToken(username, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            System.out.println("User " + username + " authenticated with JWT token.");
+
+        }
 
         filterChain.doFilter(request, response);
 
