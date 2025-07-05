@@ -1,7 +1,6 @@
 package com.cdcrane.social_konnect_backend.roles;
 
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.authentication;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.LoginDTO;
+import com.cdcrane.social_konnect_backend.config.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    /* This is for using auth controller instead of basic. (See commented out code in SecurityConfig.java)
-
     private final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager) {
+    public AuthController(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/login")
@@ -37,13 +38,15 @@ public class AuthController {
 
             Authentication authentication = authenticationManager.authenticate(auth);
 
+            String jwt = jwtUtil.createNewJwt(authentication);
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             HttpSession session = request.getSession(true);
 
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-            return ResponseEntity.ok("Login successful");
+            return ResponseEntity.ok("Login successful " + jwt);
 
         } catch (AuthenticationException e) {
 
@@ -52,21 +55,5 @@ public class AuthController {
         }
 
     }
-
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request){
-
-        SecurityContextHolder.clearContext();
-
-        HttpSession session = request.getSession(false);
-
-        if(session != null){
-            session.invalidate();
-        }
-
-        return ResponseEntity.ok("Logout successful");
-
-    }
-    */
 
 }
