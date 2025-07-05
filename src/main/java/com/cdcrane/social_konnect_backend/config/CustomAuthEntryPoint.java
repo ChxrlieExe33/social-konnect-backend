@@ -16,6 +16,14 @@ import java.time.LocalDateTime;
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
 
 
+    /**
+     * Handles any AuthenticationException thrown in our security logic.
+     * @param request The request attempting to authenticate.
+     * @param response The response to be returned.
+     * @param authException The exception thrown.
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
 

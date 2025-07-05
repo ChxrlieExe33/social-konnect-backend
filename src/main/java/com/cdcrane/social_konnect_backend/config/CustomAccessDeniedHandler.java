@@ -13,6 +13,14 @@ import java.time.LocalDateTime;
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
 
+    /**
+     * Handles any AccessDeniedException (Authorization) thrown in our security logic.
+     * @param request The request attempting to be authorized.
+     * @param response The response to be returned.
+     * @param accessDeniedException The exception thrown.
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
 

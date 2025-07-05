@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AuthEventListener {
 
+    /**
+     * Listener to execute code on successful authentication events (Logins).
+     * @param event The event that was caught.
+     */
     @EventListener(AuthenticationSuccessEvent.class)
     public void listenForSuccessful(AuthenticationSuccessEvent event) {
 
@@ -17,6 +21,10 @@ public class AuthEventListener {
 
     }
 
+    /**
+     * Listener to execute code on failed authentication events (Logins).
+     * @param event The event that was caught.
+     */
     @EventListener(AbstractAuthenticationFailureEvent.class)
     public void listenForFailed(AbstractAuthenticationFailureEvent event) {
 

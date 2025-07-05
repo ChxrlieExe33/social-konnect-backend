@@ -39,14 +39,12 @@ public class SecurityConfig {
 
         http.addFilterAfter(new JWTTokenValidatorFilter(jwtUtil), ExceptionTranslationFilter.class);
 
+        // Exception handling for AuthenticationExceptions and AccessDeniedExceptions.
         http.exceptionHandling(ehc -> ehc.authenticationEntryPoint(new CustomAuthEntryPoint()));
-
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
 
         // No sessions since we are going to use JWTs
-        http.sessionManagement(session -> {
-            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        });
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.csrf(AbstractHttpConfigurer::disable);
         return http.build();

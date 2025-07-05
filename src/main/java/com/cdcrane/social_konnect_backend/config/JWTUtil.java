@@ -3,6 +3,7 @@ package com.cdcrane.social_konnect_backend.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -19,11 +20,28 @@ public class JWTUtil {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+    private SecretKey secretKey;
 
+    /**
+     * To generate the SecretKey once after construction, instead of each time in the methods.
+     */
+    @PostConstruct
+    private void initializeSecretKey() {
 
+        if (jwtSecret == null || jwtSecret.isEmpty()) {
+            throw new IllegalStateException("JWT secret must be set");
+        }
+
+        secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+    }
+
+    /**
+     * Create a new JWT based on the successful authentication object provided by the controller.
+     * @param auth Authentication object containing user details.
+     * @return The JWT for the user to access restricted endpoints.
+     */
     public String createNewJwt(Authentication auth){
-
-        SecretKey secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 
         String jwt = Jwts.builder()
                 .issuer("Social Konnect")
@@ -40,9 +58,12 @@ public class JWTUtil {
         return jwt;
     }
 
+    /**
+     * Validates a provided JWT against the secret key and returns the associated claims.
+     * @param jwt The JWT token must be without the "Bearer " prefix.
+     * @return The Claims object obtained from the JWT.
+     */
     public Claims validateJwt(String jwt){
-
-        SecretKey secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 
         try {
 

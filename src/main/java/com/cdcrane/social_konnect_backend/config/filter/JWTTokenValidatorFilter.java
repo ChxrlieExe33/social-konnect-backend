@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -22,6 +23,14 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Filter to extract JWT from the Authorization header and validate it using JWTUtil.
+     * @param request The request attempting to be authorized.
+     * @param response The response to be returned.
+     * @param filterChain Parent filter chain.
+     * @throws ServletException
+     * @throws IOException
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -43,6 +52,10 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
             System.out.println("User " + username + " authenticated with JWT token.");
 
+        } else {
+
+            throw new BadCredentialsException("Invalid JWT token, must follow 'Bearer <token>' format.");
+
         }
 
         filterChain.doFilter(request, response);
@@ -56,7 +69,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
      * @throws ServletException
      */
     @Override
-    protected boolean shouldNotFilter(jakarta.servlet.http.HttpServletRequest request) throws jakarta.servlet.ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) throws jakarta.servlet.ServletException {
 
         return request.getRequestURI().contains("/api/auth/login");
 

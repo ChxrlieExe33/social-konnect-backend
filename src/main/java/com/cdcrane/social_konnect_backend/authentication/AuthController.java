@@ -5,6 +5,7 @@ import com.cdcrane.social_konnect_backend.config.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,10 +27,16 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * For authenticating existing users and providing them with a JWT for future auth.
+     * @param loginDTO User details for a login.
+     * @param request The request sent.
+     * @return
+     */
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
 
-        Authentication auth = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
+        Authentication auth = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
 
         try {
 
@@ -37,13 +44,10 @@ public class AuthController {
 
             String jwt = jwtUtil.createNewJwt(authentication);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
 
-            HttpSession session = request.getSession(true);
-
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
-            return ResponseEntity.ok("Login successful " + jwt);
+            return ResponseEntity.ok().headers(headers).body("Login successful");
 
         } catch (AuthenticationException e) {
 
