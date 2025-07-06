@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
@@ -12,6 +13,13 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
     Optional<ApplicationUser> findByUsername(String username);
 
     @Query("SELECT u FROM ApplicationUser u JOIN FETCH u.roles")
-    Page<ApplicationUser> findAllWithRolesPaginated(Pageable pageable);
+    List<ApplicationUser> findAllWithRoles();
+
+    ApplicationUser findById(long id);
+
+    @Query("SELECT u FROM ApplicationUser u JOIN FETCH u.roles WHERE u.id = ?1")
+    ApplicationUser findByIdWithRoles(long id);
+
+    boolean existsByUsername(String username);
 
 }

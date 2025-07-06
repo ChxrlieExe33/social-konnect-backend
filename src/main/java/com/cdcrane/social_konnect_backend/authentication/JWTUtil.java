@@ -1,6 +1,7 @@
-package com.cdcrane.social_konnect_backend.config;
+package com.cdcrane.social_konnect_backend.authentication;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -71,8 +72,14 @@ public class JWTUtil {
 
             return claims;
 
+        } catch (ExpiredJwtException e) {
+
+            throw new BadCredentialsException("JWT token expired: " + e.getMessage());
+
         } catch (Exception e) {
+
             throw new BadCredentialsException("Invalid JWT token");
+
         }
 
 

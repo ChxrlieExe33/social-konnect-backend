@@ -1,5 +1,10 @@
 package com.cdcrane.social_konnect_backend.users;
 
+import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
+import com.cdcrane.social_konnect_backend.roles.Role;
+import com.cdcrane.social_konnect_backend.roles.RoleRepository;
+import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
+import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +14,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +24,75 @@ import java.util.stream.Collectors;
 public class UserService implements UserUseCase {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
+    private final RoleRepository roleRepo;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo) {
         this.userRepository = userRepository;
+        this.encoder = encoder;
+        this.roleRepo = roleRepo;
     }
+
+    /**
+     * Method to handle registration of new users. Sets enabled to true by default.
+     * @param registration RegistrationDTO containing basic user information.
+     * @return A newly persisted ApplicationUser object.
+     */
+    public ApplicationUser registerUser(RegistrationDTO registration){
+
+        boolean alreadyExists = userRepository.existsByUsername(registration.username());
+
+        if (alreadyExists){
+            throw new UsernameTakenException("Username " + registration.username() + " is already taken." + " Please choose a different username.");
+        }
+
+        String encodedPassword = encoder.encode(registration.password());
+
+        Role userRole = roleRepo.findByName("user");
+
+        ApplicationUser user = ApplicationUser.builder()
+                .username(registration.username())
+                .password(encodedPassword)
+                .email(registration.email())
+                .roles(List.of(userRole))
+                .enabled(true)
+                .build();
+
+        return userRepository.save(user);
+
+    }
+
+    /**
+     * Method to handle registration of new users. Includes an option to change the enabled status.
+     * @param registration RegistrationDTO containing basic user information.
+     * @param enabled The status you need the “enabled” field to be set to.
+     * @return A newly persisted ApplicationUser object.
+     */
+    public ApplicationUser registerUser(RegistrationDTO registration, boolean enabled){
+
+        boolean alreadyExists = userRepository.existsByUsername(registration.username());
+
+        if (alreadyExists){
+            throw new UsernameTakenException("Username " + registration.username() + " is already taken." + " Please choose a different username.");
+        }
+
+        String encodedPassword = encoder.encode(registration.password());
+
+        Role userRole = roleRepo.findByName("user");
+
+        ApplicationUser user = ApplicationUser.builder()
+                .username(registration.username())
+                .password(encodedPassword)
+                .email(registration.email())
+                .roles(List.of(userRole))
+                .enabled(enabled)
+                .build();
+
+        return userRepository.save(user);
+
+    }
+
 
     /**
      * Method implemented from UserDetailsService from Spring Security for getting a User for authentication/authorization.
@@ -39,32 +109,56 @@ public class UserService implements UserUseCase {
         // Initialize roles since they are lazily loaded
         Hibernate.initialize(u.getRoles());
 
-        return new User(u.getUsername(), u.getPassword(),
+        return new User(u.getUsername(), u.getPassword(), u.isEnabled(), true, true, true,
                 u.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getAuthority()))
                         .collect(Collectors.toList()));
 
     }
 
+    /**
+     * Retrieve an ApplicationUser object complete with roles.
+     * @param username Username of the desired user.
+     * @return ApplicationUser object with roles.
+     */
     @Override
-    public List<ApplicationUser> getAllUsers(){
+    @Transactional
+    public ApplicationUser getUserByUsernameWithRoles(String username) {
 
-        // THIS WILL FAIL currently, need to lazily load roles or map to DTO.
-        return userRepository.findAll();
+        ApplicationUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found"));
+
+        // Since roles are lazy loaded.
+        Hibernate.initialize(user.getRoles());
+
+        return user;
 
     }
 
     /**
-     * Method to get all users from the database using pagination.
-     * @param pageable Pageable object from HTTP request, gives information on pages.
-     * @return A page of users.
+     * Retrieve an ApplicationUser object but only with non-related data. (No roles/posts/etc.)
+     * @param username Username of the desired user.
+     * @return ApplicationUser object containing only details.
      */
     @Override
-    public Page<ApplicationUser> getAllUsersPaginated(Pageable pageable){
+    public ApplicationUser getUserByUsernameOnlyUserSummary(String username) {
 
-        // Have to use this method to get with roles and paginated, map to DTO later.
-        return userRepository.findAllWithRolesPaginated(pageable);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
 
     }
+
+    /**
+     * Retrieve all ApplicationUser objects, will not load any relationships.
+     * @return List of ApplicationUser objects with non-relation details.
+     */
+    @Override
+    public List<ApplicationUser> getAllUsers(){
+
+        // Will not get roles
+        return userRepository.findAll();
+
+    }
+
 
 }

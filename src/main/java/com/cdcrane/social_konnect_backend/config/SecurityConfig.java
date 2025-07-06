@@ -1,5 +1,8 @@
 package com.cdcrane.social_konnect_backend.config;
 
+import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
+import com.cdcrane.social_konnect_backend.config.exceptionhandlers.CustomAccessDeniedHandler;
+import com.cdcrane.social_konnect_backend.config.exceptionhandlers.CustomAuthEntryPoint;
 import com.cdcrane.social_konnect_backend.config.filter.JWTTokenValidatorFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +33,7 @@ public class SecurityConfig {
     {
 
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/post/hello", "/error", "/api/auth/**").permitAll() // Permitted or specific routes first.
+                .requestMatchers("/api/post/hello", "/error", "/api/auth/login", "/api/auth/register").permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
 
         // Disable form login and http basic for JWT auth

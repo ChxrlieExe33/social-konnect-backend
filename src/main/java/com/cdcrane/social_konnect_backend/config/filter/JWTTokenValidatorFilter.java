@@ -1,6 +1,6 @@
 package com.cdcrane.social_konnect_backend.config.filter;
 
-import com.cdcrane.social_konnect_backend.config.JWTUtil;
+import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -71,7 +71,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws jakarta.servlet.ServletException {
 
-        return request.getRequestURI().contains("/api/auth/login");
+        return request.getRequestURI().contains("/api/auth/login") || request.getRequestURI().contains("/api/auth/register");
 
     }
 }
