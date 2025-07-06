@@ -21,6 +21,13 @@ public class JWTUtil {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    @Value("${jwt.issuer}")
+    private String jwtIssuer;
+
+    @Value("${jwt.expiration}")
+    private int jwtExpirationInMs;
+
     private SecretKey secretKey;
 
     /**
@@ -45,14 +52,14 @@ public class JWTUtil {
     public String createNewJwt(Authentication auth){
 
         String jwt = Jwts.builder()
-                .issuer("Social Konnect")
+                .issuer(jwtIssuer)
                 .subject("JWT Token")
                 .claim("username", auth.getName())
                 .claim("authorities", auth.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(","))) // Only get authority “name” from each, separate with comma
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 30000000)) // About 8 hours
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationInMs)) // About 8 hours
                 .signWith(secretKey)
                 .compact();
 

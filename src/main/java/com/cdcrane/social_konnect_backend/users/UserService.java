@@ -47,7 +47,9 @@ public class UserService implements UserUseCase {
 
         String encodedPassword = encoder.encode(registration.password());
 
-        Role userRole = roleRepo.findByName("user");
+        // Retrieve user role
+        Role userRole = roleRepo.findByName("user")
+                .orElseThrow(() -> new RuntimeException("The 'user' role was not found"));
 
         ApplicationUser user = ApplicationUser.builder()
                 .username(registration.username())
@@ -77,7 +79,9 @@ public class UserService implements UserUseCase {
 
         String encodedPassword = encoder.encode(registration.password());
 
-        Role userRole = roleRepo.findByName("user");
+        // Retrieve user role
+        Role userRole = roleRepo.findByName("user")
+                .orElseThrow(() -> new RuntimeException("The 'user' role was not found"));
 
         ApplicationUser user = ApplicationUser.builder()
                 .username(registration.username())

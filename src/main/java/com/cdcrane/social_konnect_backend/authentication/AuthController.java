@@ -6,6 +6,7 @@ import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationResponseDTO;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserService;
+import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<ApplicationUser> getCurrentUser(HttpServletRequest request){
+    public ResponseEntity<UserSummaryDTO> getCurrentUser(HttpServletRequest request){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -104,7 +105,9 @@ public class AuthController {
 
         ApplicationUser user = userService.getUserByUsernameWithRoles(auth.getName());
 
-        return ResponseEntity.ok(user);
+        UserSummaryDTO summary = new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio());
+
+        return ResponseEntity.ok(summary);
     }
 
 }
