@@ -8,8 +8,6 @@ import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenExceptio
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,7 +62,7 @@ public class UserService implements UserUseCase {
     }
 
     /**
-     * Method to handle registration of new users. Includes an option to change the enabled status.
+     * Overloaded Method to handle registration of new users. Includes an option to change the enabled status.
      * @param registration RegistrationDTO containing basic user information.
      * @param enabled The status you need the “enabled” field to be set to.
      * @return A newly persisted ApplicationUser object.
