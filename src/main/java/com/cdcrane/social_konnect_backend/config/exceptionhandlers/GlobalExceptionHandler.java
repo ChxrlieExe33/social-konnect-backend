@@ -1,14 +1,19 @@
 package com.cdcrane.social_konnect_backend.config.exceptionhandlers;
 
 import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorResponse;
+import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -62,6 +67,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsernameTakenException.class)
     public ResponseEntity<ExceptionErrorResponse> handleUsernameTakenException(UsernameTakenException ex) {
 
+
         ExceptionErrorResponse error = ExceptionErrorResponse.builder()
                 .message(ex.getMessage())
                 .responseCode(HttpStatus.CONFLICT.value())
@@ -72,15 +78,25 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle validation errors from DTOs being used in controllers.
-     * @param ex Exception thrown.
+     * Handle validation errors from DTOs passed in the RequestBody of a controller method.
+     * @param ex Exception thrown. This exception contains a collection of errors, each being any validation errors triggered.
      * @return Response explaining problem.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 
-        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
-                .message("Request body is invalid, please provide all fields")
+        Map<String, String> errors = new HashMap<>();
+
+        // Map list of validation errors found, provided by exception, into a hashmap.
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        // Special error response for validation errors since it needs to be a JSON object for the client to use.
+        ValidationErrorResponse error = ValidationErrorResponse.builder()
+                .errors(errors)
                 .responseCode(HttpStatus.BAD_REQUEST.value())
                 .timestamp(System.currentTimeMillis())
                 .build();
@@ -88,6 +104,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
     }
+
+    // TODO: Create handler for ConstraintViolationException (for when you use validation annotations directly in the controller
+    //                                                       parameters instead of in the DTO, like you would to validate a path variable)
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
