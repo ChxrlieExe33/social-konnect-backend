@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.posts;
 
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
+import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +44,17 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@RequestBody CreatePostDTO createPostDTO){
 
-        Post post = Post.builder().caption(createPostDTO.caption()).build();
+        List<PostMedia> media = createPostDTO.media().stream()
+                .map(mediaDTO -> PostMedia.builder().mediaUrl(mediaDTO.mediaUrl()).mediaType(mediaDTO.mediaType()).build())
+                .toList();
+
+        Post post = Post.builder().caption(createPostDTO.caption()).postMedia(media).build();
 
         Post savedPost = postUseCase.savePost(post);
 
-        return ResponseEntity.ok(new PostDTO(savedPost.getId(), savedPost.getCaption(), List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt()));
+        return ResponseEntity.ok(new PostDTO(savedPost.getId(), savedPost.getCaption(),
+                savedPost.getPostMedia().stream().map(m -> new PostMediaDTO(m.getMediaUrl(), m.getMediaType())).toList(),
+                savedPost.getUser().getUsername(), savedPost.getPostedAt()));
 
     }
 
