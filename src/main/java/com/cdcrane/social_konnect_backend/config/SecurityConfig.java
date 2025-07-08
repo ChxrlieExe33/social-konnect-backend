@@ -33,7 +33,9 @@ public class SecurityConfig {
     {
 
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/post/hello", "/error", "/api/auth/login", "/api/auth/register").permitAll() // Permitted or specific routes first.
+                .requestMatchers("/error",
+                                "/api/auth/login",
+                                "/api/auth/register").permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
 
         // Disable form login and http basic for JWT auth

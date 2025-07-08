@@ -51,6 +51,7 @@ public class ApplicationUser {
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("user")
     private List<Post> posts;
 
     public void addPost(Post post){
