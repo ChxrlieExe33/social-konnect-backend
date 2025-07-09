@@ -34,3 +34,4 @@ build/
 ### OTHER ###
 .env
 
+uploads/
