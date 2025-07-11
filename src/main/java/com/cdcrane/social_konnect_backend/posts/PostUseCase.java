@@ -12,4 +12,6 @@ public interface PostUseCase {
     Post savePost(Post post);
 
     void deletePost(UUID postId);
+
+    Post updatePostCaption(UUID postId, String caption);
 }

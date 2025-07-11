@@ -3,6 +3,7 @@ package com.cdcrane.social_konnect_backend.posts;
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.UpdatePostCaptionDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +105,20 @@ public class PostController {
 
     }
 
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostDTO> updatePostCaption(@PathVariable UUID postId, @RequestBody UpdatePostCaptionDTO caption){
+
+        Post post = postUseCase.updatePostCaption(postId, caption.caption());
+
+        PostDTO response = convertPostToPostDTO(post);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+
+    // ---------------------------- HELPER METHODS ----------------------------
+
     private List<PostDTO> convertPostListToPostDTOList(List<Post> posts){
 
         return posts.stream()
@@ -113,6 +128,14 @@ public class PostController {
                         post.getUser().getUsername(), post.getPostedAt()))
                 .toList();
 
+    }
+
+    private PostDTO convertPostToPostDTO(Post post){
+
+        return new PostDTO(post.getId(), post.getCaption(),
+                post.getPostMedia().stream()
+                        .map(media -> new PostMediaDTO(media.getMediaUrl(), media.getMediaType())).collect(Collectors.toList()),
+                post.getUser().getUsername(), post.getPostedAt());
     }
 
 }
