@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.config.exceptionhandlers;
 
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidException;
+import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
 import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorResponse;
 import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
@@ -110,6 +111,11 @@ public class GlobalExceptionHandler {
     // TODO: Create handler for ConstraintViolationException (for when you use validation annotations directly in the controller
     //                                                       parameters instead of in the DTO, like you would to validate a path variable)
 
+    /**
+     * Handle errors where the specified user account was not found.
+     * @param ex Exception thrown.
+     * @return Response explaining problem.
+     */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
 
@@ -123,6 +129,11 @@ public class GlobalExceptionHandler {
 
     }
 
+    /**
+     * Handle errors where the user tries to upload a non-permitted file type.
+     * @param ex Exception thrown.
+     * @return Response explaining problem.
+     */
     @ExceptionHandler(FileTypeNotValidException.class)
     public ResponseEntity<ExceptionErrorResponse> handleFileTypeNotValidException(FileTypeNotValidException ex) {
 
@@ -136,6 +147,11 @@ public class GlobalExceptionHandler {
 
     }
 
+    /**
+     * Handle errors where a user does not have permission to perform an action on a domain object.
+     * @param ex Exception thrown.
+     * @return Response explaining problem.
+     */
     @ExceptionHandler(ActionNotPermittedException.class)
     public ResponseEntity<ExceptionErrorResponse> handleActionNotPermittedException(ActionNotPermittedException ex) {
 
@@ -146,6 +162,23 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    /**
+     * Handle errors where a domain object was not found.
+     * @param ex Exception thrown.
+     * @return Response explaining problem.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.NOT_FOUND.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
 }

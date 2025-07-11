@@ -15,10 +15,10 @@ I will implement these over time, this list might also grow.
 
 # Post
 
-- Create posts. (With or without media)
-- Update posts (Change caption, add/remove media, etc.)
+- Create posts. (With or without media) (DONE)
+- Update posts (Change caption, add/remove media, etc.) (Change caption DONE)
 - Retrieve post by ID.
-- Delete posts.
+- Delete posts. (DONE)
 - Retrieve a paginated list of posts ordered by most recent (for the “explore” page).
 - Do the same as the last one, but for users that the current user follows.
 
