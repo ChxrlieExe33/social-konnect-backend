@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.posts;
 
+import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserRepository;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
@@ -44,6 +45,7 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public Post savePost(Post post) {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -57,7 +59,23 @@ public class PostService implements PostUseCase {
     }
 
     @Override
+    @Transactional
     public void deletePost(UUID postId) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        ApplicationUser user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+
+        Post post = postRepo.findById(postId).orElseThrow(() -> new UserNotFoundException("Post with id " + postId + " not found"));
+
+        if(post.getUser().getId() == user.getId()){
+
+            postRepo.deleteById(postId);
+
+        } else {
+
+            throw new ActionNotPermittedException("User " + username + " is not allowed to delete post with id " + postId + " as it does not belong to them. (Only the user who created the post can delete it.)");
+        }
 
     }
 }

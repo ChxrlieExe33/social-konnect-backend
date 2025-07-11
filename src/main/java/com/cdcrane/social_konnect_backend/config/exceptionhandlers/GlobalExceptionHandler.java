@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.config.exceptionhandlers;
 
+import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidException;
 import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorResponse;
 import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
@@ -133,6 +134,18 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
+    }
+
+    @ExceptionHandler(ActionNotPermittedException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleActionNotPermittedException(ActionNotPermittedException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.FORBIDDEN.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
 }

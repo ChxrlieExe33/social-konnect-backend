@@ -4,11 +4,12 @@ I will implement these over time, this list might also grow.
 
 # ApplicationUser
 
-- Sign up to be a user.
-- Get the user summary (username, bio, pfp).
+- Sign up to be a user. (DONE without email verification)
+- Get the user summary (username, bio, pfp). (DONE)
 - Get the user summary and list of posts (paginated) for the profile page.
 - Get a list of all posts created by a user (paginated)
-- Update profile data (username, bio, email, pfp)
+- Update profile data (bio, email, pfp)
+- Update username (separate to rest)
 - Change password.
 - Delete account.
 

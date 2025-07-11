@@ -6,12 +6,14 @@ import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -90,6 +92,15 @@ public class PostController {
         List<PostDTO> response = convertPostListToPostDTOList(posts);
 
         return ResponseEntity.ok(response);
+
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable UUID postId){
+
+        postUseCase.deletePost(postId);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
     }
 
