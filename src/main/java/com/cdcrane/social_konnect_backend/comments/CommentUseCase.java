@@ -8,5 +8,5 @@ public interface CommentUseCase {
 
     Comment addCommentToPostByPostId(AddCommentDTO addCommentDTO, UUID postId);
 
-    void deleteComment(Comment comment);
+    void deleteComment(UUID commentId);
 }
