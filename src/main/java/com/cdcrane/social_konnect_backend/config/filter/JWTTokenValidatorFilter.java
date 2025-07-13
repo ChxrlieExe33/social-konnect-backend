@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Set;
 
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
@@ -71,7 +72,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws jakarta.servlet.ServletException {
 
-        return request.getRequestURI().contains("/api/auth/login") || request.getRequestURI().contains("/api/auth/register");
+        Set<String> excludedPaths = Set.of("/api/auth/login", "/api/auth/register", "/error");
+
+        return excludedPaths.contains(request.getRequestURI());
 
     }
 }

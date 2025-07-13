@@ -132,11 +132,18 @@ public class PostService implements PostUseCase {
 
         if(post.getUser().getId() == user.getId()){
 
-            for (PostMedia media : post.getPostMedia()) {
-                fileHandler.deleteFile(media.getFileName());
-            }
+            List<PostMedia> postMedia = post.getPostMedia();
 
+            // Delete post in the database, will delete files if this works.
             postRepo.deleteById(postId);
+
+            // If the post had media, delete the files.
+            if(postMedia != null && !postMedia.isEmpty()){
+
+                for (PostMedia pm : postMedia) {
+                    fileHandler.deleteFile(pm.getFileName());
+                }
+            }
 
         } else {
 
