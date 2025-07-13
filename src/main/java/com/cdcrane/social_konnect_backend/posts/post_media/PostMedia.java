@@ -25,4 +25,7 @@ public class PostMedia {
     @Column(name = "media_type")
     private String mediaType;
 
+    @Column(name = "file_name")
+    private String fileName;
+
 }

@@ -1,18 +1,17 @@
 package com.cdcrane.social_konnect_backend.posts;
 
-import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.UpdatePostCaptionDTO;
-import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,12 +21,10 @@ import java.util.stream.Collectors;
 public class PostController {
 
     private final PostUseCase postUseCase;
-    private final FileHandler fileHandler;
 
     @Autowired
-    public PostController(PostUseCase postUseCase, FileHandler fileHandler) {
+    public PostController(PostUseCase postUseCase) {
         this.postUseCase = postUseCase;
-        this.fileHandler = fileHandler;
     }
 
     @GetMapping("/hidden_hello")
@@ -39,11 +36,12 @@ public class PostController {
 
 
     @GetMapping
-    public ResponseEntity<List<PostDTO>> getAllPosts(){
+    public ResponseEntity<Page<PostDTO>> getAllPosts(Pageable pageable){
 
-        List<Post> posts = postUseCase.getAllPosts();
+        Page<Post> posts = postUseCase.getAllPosts(pageable);
 
-        List<PostDTO> response = convertPostListToPostDTOList(posts);
+        // Map each Post in the Page to PostDTO
+        var response = posts.map(this::convertPostToPostDTO);
 
         return ResponseEntity.ok(response);
     }
@@ -53,22 +51,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<PostDTO> createPost(@ModelAttribute CreatePostDTO createPostDTO) {
 
-        List<PostMedia> media = new ArrayList<>();
+        Post savedPost = postUseCase.savePost(createPostDTO);
 
-        if (createPostDTO.files() == null || createPostDTO.files().isEmpty()) {
-
-            media = null;
-
-        } else {
-            media = fileHandler.saveFiles(createPostDTO.files());
-
-        }
-
-        Post post = Post.builder().caption(createPostDTO.caption()).postMedia(media).build();
-
-        Post savedPost = postUseCase.savePost(post);
-
-        // If just text post
+        // If just text post, return empty list.
         if(savedPost.getPostMedia() == null){
 
             // Return media as empty list
@@ -77,7 +62,7 @@ public class PostController {
 
         }
 
-        // Otherwise return media.
+        // Otherwise return post with media.
         return ResponseEntity.ok(new PostDTO(savedPost.getId(), savedPost.getCaption(),
                 savedPost.getPostMedia().stream()
                         .map(m -> new PostMediaDTO(m.getMediaUrl(), m.getMediaType())).toList(),
@@ -86,11 +71,12 @@ public class PostController {
     }
 
     @GetMapping("/{username}")
-    public ResponseEntity<List<PostDTO>> getPostsByUsername(@PathVariable String username){
+    public ResponseEntity<Page<PostDTO>> getPostsByUsername(@PathVariable String username, Pageable pageable){
 
-        List<Post> posts = postUseCase.getPostsByUsername(username);
+        Page<Post> posts = postUseCase.getPostsByUsername(username, pageable);
 
-        List<PostDTO> response = convertPostListToPostDTOList(posts);
+        // Map each Post in the Page to PostDTO
+        var response = posts.map(this::convertPostToPostDTO);
 
         return ResponseEntity.ok(response);
 
@@ -118,17 +104,6 @@ public class PostController {
 
 
     // ---------------------------- HELPER METHODS ----------------------------
-
-    private List<PostDTO> convertPostListToPostDTOList(List<Post> posts){
-
-        return posts.stream()
-                .map(post -> new PostDTO(post.getId(), post.getCaption(),
-                        post.getPostMedia().stream()
-                                .map(media -> new PostMediaDTO(media.getMediaUrl(), media.getMediaType())).collect(Collectors.toList()),
-                        post.getUser().getUsername(), post.getPostedAt()))
-                .toList();
-
-    }
 
     private PostDTO convertPostToPostDTO(Post post){
 

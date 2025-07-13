@@ -19,6 +19,11 @@ import java.util.*;
 @Component
 public class LocalFileHandler implements FileHandler {
 
+    /**
+     * Take a list of MultipartFile, validate them, and call saveFile method to handle saving to the local filesystem.
+     * @param files The list of MultipartFile to store.
+     * @return A list of PostMedia, which can be added to a Post entity before persisting.
+     */
     @Override
     public List<PostMedia> saveFiles(List<MultipartFile> files) {
 
@@ -41,7 +46,11 @@ public class LocalFileHandler implements FileHandler {
             String fileUrl = "http://localhost:8080/" + fileInfo.get("filename");
 
 
-            media.add(PostMedia.builder().mediaType(fileInfo.get("mimeType")).mediaUrl(fileUrl).build());
+            media.add(PostMedia.builder()
+                    .mediaType(fileInfo.get("mimeType"))
+                    .mediaUrl(fileUrl)
+                    .fileName(fileInfo.get("filename"))
+                    .build());
 
         }
 
@@ -54,6 +63,11 @@ public class LocalFileHandler implements FileHandler {
 
     }
 
+    /**
+     * Handle the saving in the local filesystem of each file.
+     * @param file The validated MultipartFile to save.
+     * @return A HashMap with file information, being fileName and mimeType.
+     */
     private Map<String, String> storeFile(MultipartFile file) {
 
         try {

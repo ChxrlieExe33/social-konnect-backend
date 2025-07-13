@@ -1,17 +1,23 @@
 package com.cdcrane.social_konnect_backend.posts;
 
+import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
+import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
+import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserRepository;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,42 +26,88 @@ public class PostService implements PostUseCase {
 
     private final PostRepository postRepo;
     private final UserRepository userRepo;
+    private final SecurityUtils securityUtils;
+    private final FileHandler fileHandler;
 
     @Autowired
-    public PostService(PostRepository postRepo, UserRepository userRepo) {
+    public PostService(PostRepository postRepo, UserRepository userRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
         this.postRepo = postRepo;
         this.userRepo = userRepo;
+        this.securityUtils = securityUtils;
+        this.fileHandler = fileHandler;
     }
 
+    /**
+     * Get all posts, paginated and ordered by the creation date, newest first.
+     * @param pageable Pageable data from request.
+     * @return A page of posts.
+     */
     @Override
-    public List<Post> getAllPosts() {
+    public Page<Post> getAllPosts(Pageable pageable) {
 
-        return this.postRepo.findAll();
+        Page<Post> posts = this.postRepo.getPostsOrderByPostedAt(pageable);
+
+        if (posts.isEmpty()) {
+            throw new ResourceNotFoundException("No posts found");
+        }
+
+        return posts;
 
     }
 
+    /**
+     * Get all posts by username, paginated and ordered by creation date, newest first.
+     * @param username The username to search by.
+     * @param pageable Pageable data from request.
+     * @return Page of posts created by a specific user.
+     */
     @Override
     @Transactional
-    public List<Post> getPostsByUsername(String username) {
+    public Page<Post> getPostsByUsername(String username, Pageable pageable) {
 
-        ApplicationUser user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+        Page<Post> posts = this.postRepo.getPostsByUsernameOrderByPostedAt(username, pageable);
 
-        Hibernate.initialize(user.getPosts());
+        if (posts.isEmpty()) {
+            throw new ResourceNotFoundException("No posts found for user with username " + username);
+        }
 
-        return user.getPosts();
+        return posts;
 
     }
 
+    /**
+     * Save a new post in the database, along with media if present.
+     * @param createPostDTO A DTO containing Post information to persist.
+     * @return The Post object saved.
+     */
     @Override
     @Transactional
-    public Post savePost(Post post) {
+    public Post savePost(CreatePostDTO createPostDTO) {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Initialize an empty media list.
+        List<PostMedia> media = new ArrayList<>();
 
-        ApplicationUser user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + post.getUser().getUsername() + " not found"));
+        // If there are no files, set to null.
+        if (createPostDTO.files() == null || createPostDTO.files().isEmpty()) {
 
+            media = null;
+
+        } else {
+            media = fileHandler.saveFiles(createPostDTO.files());
+
+        }
+
+        Post post = Post.builder()
+                .caption(createPostDTO.caption())
+                .postMedia(media)
+                .build();
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        // Set the currently authed user as creator of Post.
         post.setUser(user);
 
+        // Remove bad HTML tags from the caption.
         String cleanCaption = TextInputValidator.removeHtmlTagsAllowBasic(post.getCaption());
 
         post.setCaption(cleanCaption);
@@ -64,6 +116,10 @@ public class PostService implements PostUseCase {
 
     }
 
+    /**
+     * Delete a post by its ID, only user who created Post can delete the post.
+     * @param postId ID of the Post.
+     */
     @Override
     @Transactional
     public void deletePost(UUID postId) {
@@ -85,6 +141,12 @@ public class PostService implements PostUseCase {
 
     }
 
+    /**
+     * Update the caption of a Post by specifying the Post ID.
+     * @param postId ID of the Post.
+     * @param caption New caption to set.
+     * @return The Updated Post object.
+     */
     @Override
     @Transactional
     public Post updatePostCaption(UUID postId, String caption) {

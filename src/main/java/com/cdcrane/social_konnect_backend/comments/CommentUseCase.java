@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface CommentUseCase {
 
-    Comment addCommentToPostByPostId(AddCommentDTO addCommentDTO, UUID postId);
+    Comment addCommentToPostByPostId(AddCommentDTO addCommentDTO);
 
     void deleteComment(UUID commentId);
 }

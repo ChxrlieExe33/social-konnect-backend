@@ -23,7 +23,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<CommentDTO> addCommentToPostByPostId(@Valid @RequestBody AddCommentDTO addCommentDTO){
 
-        Comment comment = commentUseCase.addCommentToPostByPostId(addCommentDTO, addCommentDTO.postId());
+        Comment comment = commentUseCase.addCommentToPostByPostId(addCommentDTO);
 
         return ResponseEntity.ok(new CommentDTO(comment.getId(), comment.getContent(), comment.getCreatedAt()));
 
