@@ -9,4 +9,6 @@ public interface FileHandler {
 
     List<PostMedia> saveFiles(List<MultipartFile> files);
 
+    void deleteFile(String fileName);
+
 }

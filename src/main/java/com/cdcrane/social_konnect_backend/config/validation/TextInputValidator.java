@@ -15,4 +15,10 @@ public class TextInputValidator {
 
         return Jsoup.clean(input, Safelist.basic());
     }
+
+    public static boolean isValidUsername(String username) {
+
+        return Jsoup.isValid(username, Safelist.none());
+
+    }
 }

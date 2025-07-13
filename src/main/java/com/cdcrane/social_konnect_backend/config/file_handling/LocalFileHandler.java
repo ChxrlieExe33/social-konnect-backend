@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.config.file_handling;
 
 import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidException;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ import java.util.*;
  * Class to handle uploaded files in MultipartFile format and store them locally.
  */
 @Component
+@Slf4j
 public class LocalFileHandler implements FileHandler {
 
     /**
@@ -56,7 +58,7 @@ public class LocalFileHandler implements FileHandler {
 
         // TODO: Implement real error/exception handling for the file saving.
         for (String error : errors) {
-            System.err.println(error);
+            log.warn("File upload failed for file: {} , cause {} .", error, error);
         }
 
         return media;
@@ -126,5 +128,20 @@ public class LocalFileHandler implements FileHandler {
         }
 
 
+    }
+
+    public void deleteFile(String fileName) {
+
+        try {
+
+            Path file = Paths.get("uploads/" + fileName);
+
+            Files.delete(file);
+
+        } catch (IOException e) {
+
+            log.warn("File deletion failed for file: {} , cause {} .", fileName, e.getMessage());
+
+        }
     }
 }

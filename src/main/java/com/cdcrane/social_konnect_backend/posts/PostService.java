@@ -132,6 +132,10 @@ public class PostService implements PostUseCase {
 
         if(post.getUser().getId() == user.getId()){
 
+            for (PostMedia media : post.getPostMedia()) {
+                fileHandler.deleteFile(media.getFileName());
+            }
+
             postRepo.deleteById(postId);
 
         } else {

@@ -1,6 +1,8 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
+import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
+import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
@@ -43,6 +45,10 @@ public class UserService implements UserUseCase {
 
         if (alreadyExists){
             throw new UsernameTakenException("Username " + registration.username() + " is already taken." + " Please choose a different username.");
+        }
+
+        if(!TextInputValidator.isValidUsername(registration.username())){
+            throw new UsernameNotValidException("Usernames cannot contain HTML tags, please try again.");
         }
 
         String encodedPassword = encoder.encode(registration.password());
