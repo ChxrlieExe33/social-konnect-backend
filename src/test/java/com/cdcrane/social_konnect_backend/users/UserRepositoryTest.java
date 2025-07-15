@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -16,7 +15,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class UserRepositoryTest {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository underTest;
 
     @BeforeEach
     void setUp() {
@@ -24,7 +23,7 @@ class UserRepositoryTest {
 
     @AfterEach
     void tearDown() {
-        userRepository.deleteAll();
+        underTest.deleteAll();
     }
 
     @Test
@@ -41,10 +40,10 @@ class UserRepositoryTest {
                 .roles(List.of(role))
                 .build();
 
-        ApplicationUser saved = userRepository.save(user1);
+        ApplicationUser saved = underTest.save(user1);
 
         // When
-        ApplicationUser result = userRepository.findByIdWithRoles(saved.getId());
+        ApplicationUser result = underTest.findByIdWithRoles(saved.getId());
 
         // Then
         assertThat(result.getUsername()).isEqualTo("user1");
@@ -58,9 +57,60 @@ class UserRepositoryTest {
         // Given no users with the correct id
 
         // When
-        ApplicationUser result = userRepository.findByIdWithRoles(999);
+        ApplicationUser result = underTest.findByIdWithRoles(999);
 
         // Then
         assertThat(result).isNull();
+    }
+
+    @Test
+    void shouldFindAllUsersWithRoles(){
+
+        // Given
+        Role role1 = new Role();
+        role1.setAuthority("ROLE_USER");
+
+        Role role2 = new Role();
+        role1.setAuthority("ROLE_ADMIN");
+
+        ApplicationUser user1 = ApplicationUser.builder()
+                .username("user1")
+                .password("password1")
+                .roles(List.of(role1))
+                .build();
+
+        ApplicationUser user2 = ApplicationUser.builder()
+                .username("user2")
+                .password("password2")
+                .roles(List.of(role2))
+                .build();
+
+        underTest.save(user1);
+        underTest.save(user2);
+
+        // When
+        List<ApplicationUser> results =  underTest.findAllWithRoles();
+
+        // Then
+        assertThat(results).isNotNull();
+
+        assertThat(results.size()).isEqualTo(2);
+
+        assertThat(results.get(0).getRoles()).isNotNull();
+        assertThat(results.get(1).getRoles()).isNotNull();
+    }
+
+    @Test
+    void shouldNotFindAllUsersWithRoles(){
+
+        // Given no users
+
+        // When
+        List<ApplicationUser> results =  underTest.findAllWithRoles();
+
+        // Then
+        assertThat(results.isEmpty()).isTrue();
+
+
     }
 }
