@@ -44,7 +44,7 @@ public class ApplicationUser {
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @JsonIgnoreProperties("users")
     private List<Role> roles;
