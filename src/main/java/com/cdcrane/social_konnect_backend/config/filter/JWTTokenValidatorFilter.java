@@ -1,11 +1,13 @@
 package com.cdcrane.social_konnect_backend.config.filter;
 
 import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
+import com.cdcrane.social_konnect_backend.config.SecurityConfig;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
+@Slf4j
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -51,7 +54,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            System.out.println("User " + username + " authenticated with JWT token.");
+            log.info("User {} authenticated with JWT token.", username);
 
         } else {
 
@@ -72,9 +75,12 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws jakarta.servlet.ServletException {
 
-        Set<String> excludedPaths = Set.of("/api/auth/login", "/api/auth/register", "/error");
+        for (String uri : SecurityConfig.PUBLIC_URIS){
+            if (request.getRequestURI().equals(uri)){
+                return true;
+            }
+        }
 
-        return excludedPaths.contains(request.getRequestURI());
-
+        return false;
     }
 }

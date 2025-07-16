@@ -23,6 +23,12 @@ public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
 
+    public static final String[] PUBLIC_URIS = {
+            "/error",
+            "/api/auth/login",
+            "/api/auth/register"
+    };
+
     @Autowired
     public SecurityConfig(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -33,9 +39,7 @@ public class SecurityConfig {
     {
 
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/error",
-                                "/api/auth/login",
-                                "/api/auth/register").permitAll() // Permitted or specific routes first.
+                .requestMatchers(PUBLIC_URIS).permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
 
         // Disable form login and http basic for JWT auth
