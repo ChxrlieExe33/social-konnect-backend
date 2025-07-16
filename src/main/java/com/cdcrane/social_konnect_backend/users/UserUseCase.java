@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UserUseCase extends UserDetailsService {
 
-    ApplicationUser registerUser(RegistrationDTO registration);
+    ApplicationUser registerUser(RegistrationDTO registration, boolean enabled);
 
     List<ApplicationUser> getAllUsers();
 

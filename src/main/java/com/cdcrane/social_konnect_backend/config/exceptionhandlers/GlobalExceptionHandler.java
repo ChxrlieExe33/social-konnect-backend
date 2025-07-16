@@ -6,6 +6,7 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundExce
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorResponse;
 import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
+import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import org.springframework.http.HttpStatus;
@@ -119,6 +120,24 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.NOT_FOUND.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+
+    }
+
+    /**
+     * Handle errors where the specified Role was not found.
+     * @param ex Exception thrown.
+     * @return Response explaining problem.
+     */
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleRoleNotFoundException(RoleNotFoundException ex) {
 
         ExceptionErrorResponse error = ExceptionErrorResponse.builder()
                 .message(ex.getMessage())

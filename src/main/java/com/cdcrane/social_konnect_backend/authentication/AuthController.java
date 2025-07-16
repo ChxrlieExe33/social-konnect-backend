@@ -44,7 +44,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegistrationResponseDTO> register(@Valid @RequestBody RegistrationDTO registerDTO, HttpServletRequest request){
 
-        ApplicationUser user = userService.registerUser(registerDTO);
+        ApplicationUser user = userService.registerUser(registerDTO, true);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), null,
                 user.getRoles().stream()

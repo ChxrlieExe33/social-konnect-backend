@@ -5,6 +5,7 @@ import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidExce
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
+import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import jakarta.transaction.Transactional;
@@ -35,11 +36,12 @@ public class UserService implements UserUseCase {
     }
 
     /**
-     * Method to handle registration of new users. Sets enabled to true by default.
+     * Method to handle registration of new users. Includes an option to change the enabled status.
      * @param registration RegistrationDTO containing basic user information.
+     * @param enabled The status you need the “enabled” field to be set to.
      * @return A newly persisted ApplicationUser object.
      */
-    public ApplicationUser registerUser(RegistrationDTO registration){
+    public ApplicationUser registerUser(RegistrationDTO registration, boolean enabled){
 
         boolean alreadyExists = userRepository.existsByUsername(registration.username());
 
@@ -55,39 +57,7 @@ public class UserService implements UserUseCase {
 
         // Retrieve user role
         Role userRole = roleRepo.findByName("user")
-                .orElseThrow(() -> new RuntimeException("The 'user' role was not found"));
-
-        ApplicationUser user = ApplicationUser.builder()
-                .username(registration.username())
-                .password(encodedPassword)
-                .email(registration.email())
-                .roles(List.of(userRole))
-                .enabled(true)
-                .build();
-
-        return userRepository.save(user);
-
-    }
-
-    /**
-     * Overloaded Method to handle registration of new users. Includes an option to change the enabled status.
-     * @param registration RegistrationDTO containing basic user information.
-     * @param enabled The status you need the “enabled” field to be set to.
-     * @return A newly persisted ApplicationUser object.
-     */
-    public ApplicationUser registerUser(RegistrationDTO registration, boolean enabled){
-
-        boolean alreadyExists = userRepository.existsByUsername(registration.username());
-
-        if (alreadyExists){
-            throw new UsernameTakenException("Username " + registration.username() + " is already taken." + " Please choose a different username.");
-        }
-
-        String encodedPassword = encoder.encode(registration.password());
-
-        // Retrieve user role
-        Role userRole = roleRepo.findByName("user")
-                .orElseThrow(() -> new RuntimeException("The 'user' role was not found"));
+                .orElseThrow(() -> new RoleNotFoundException("The 'user' role was not found"));
 
         ApplicationUser user = ApplicationUser.builder()
                 .username(registration.username())
@@ -134,7 +104,7 @@ public class UserService implements UserUseCase {
     public ApplicationUser getUserByUsernameWithRoles(String username) {
 
         ApplicationUser user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
 
         // Since roles are lazy loaded.
         Hibernate.initialize(user.getRoles());
@@ -164,7 +134,15 @@ public class UserService implements UserUseCase {
     public List<ApplicationUser> getAllUsers(){
 
         // Will not get roles
-        return userRepository.findAll();
+        List<ApplicationUser> users = userRepository.findAll();
+
+        if(users.isEmpty()){
+
+            throw new UserNotFoundException("No users were found");
+
+        }
+
+        return users;
 
     }
 
