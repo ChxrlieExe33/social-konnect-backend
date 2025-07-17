@@ -25,14 +25,12 @@ import java.util.UUID;
 public class PostService implements PostUseCase {
 
     private final PostRepository postRepo;
-    private final UserRepository userRepo;
     private final SecurityUtils securityUtils;
     private final FileHandler fileHandler;
 
     @Autowired
-    public PostService(PostRepository postRepo, UserRepository userRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
+    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
         this.postRepo = postRepo;
-        this.userRepo = userRepo;
         this.securityUtils = securityUtils;
         this.fileHandler = fileHandler;
     }
@@ -124,9 +122,7 @@ public class PostService implements PostUseCase {
     @Transactional
     public void deletePost(UUID postId) {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        ApplicationUser user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+        ApplicationUser user = securityUtils.getCurrentAuth();
 
         Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot delete post."));
 
@@ -147,7 +143,7 @@ public class PostService implements PostUseCase {
 
         } else {
 
-            throw new ActionNotPermittedException("User " + username + " is not allowed to delete post with id " + postId + " as it does not belong to them. (Only the user who created the post can delete it.)");
+            throw new ActionNotPermittedException("User " + user.getUsername() + " is not allowed to delete post with id " + postId + " as it does not belong to them. (Only the user who created the post can delete it.)");
         }
 
     }
@@ -162,15 +158,13 @@ public class PostService implements PostUseCase {
     @Transactional
     public Post updatePostCaption(UUID postId, String caption) {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        ApplicationUser user = userRepo.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+        ApplicationUser user = securityUtils.getCurrentAuth();
 
         Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot update caption."));
 
         if (post.getUser().getId() != user.getId()) {
 
-            throw new ActionNotPermittedException("User " + username + " is not allowed to update post with id " + postId + " as it does not belong to them. (Only the user who created the post can update it.)");
+            throw new ActionNotPermittedException("User " + user.getUsername() + " is not allowed to update post with id " + postId + " as it does not belong to them. (Only the user who created the post can update it.)");
         }
 
         String cleanCaption = TextInputValidator.removeHtmlTagsAllowBasic(caption);
