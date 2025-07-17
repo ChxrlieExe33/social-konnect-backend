@@ -57,13 +57,13 @@ public class PostController {
         if(savedPost.getPostMedia() == null){
 
             // Return media as empty list
-            return ResponseEntity.ok(new PostDTO(savedPost.getId(), savedPost.getCaption(),
+            return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
                     List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt()));
 
         }
 
         // Otherwise return post with media.
-        return ResponseEntity.ok(new PostDTO(savedPost.getId(), savedPost.getCaption(),
+        return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
                 savedPost.getPostMedia().stream()
                         .map(m -> new PostMediaDTO(m.getMediaUrl(), m.getMediaType())).toList(),
                 savedPost.getUser().getUsername(), savedPost.getPostedAt()));

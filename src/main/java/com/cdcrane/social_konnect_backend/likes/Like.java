@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.likes;
 
+import com.cdcrane.social_konnect_backend.posts.Post;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,5 +32,9 @@ public class Like {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private ApplicationUser user;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
 }
