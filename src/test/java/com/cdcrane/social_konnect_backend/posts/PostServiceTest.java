@@ -7,7 +7,6 @@ import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.cdcrane.social_konnect_backend.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +19,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -336,6 +332,78 @@ class PostServiceTest {
 
         verify(postRepository, never()).deleteById(any());
         verify(fileHandler, never()).deleteFile(any());
+
+    }
+
+    @Test
+    void shouldUpdatePostCaption(){
+
+        // Given
+        ApplicationUser user = ApplicationUser.builder().id(1L).username("testuser").build();
+        Post p1 = Post.builder()
+                .id(UUID.randomUUID()).caption("Post 1").user(user).postMedia(null).build();
+
+        given(securityUtils.getCurrentAuth()).willReturn(user);
+        given(postRepository.findById(any())).willReturn(Optional.of(p1));
+
+        String newCaption = "Post 1 updated";
+
+        // When
+        underTest.updatePostCaption(p1.getId(), newCaption);
+
+        // Then
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+
+        verify(securityUtils).getCurrentAuth();
+        verify(postRepository).findById(p1.getId());
+        verify(postRepository).save(captor.capture());
+
+        Post result = captor.getValue();
+
+        assertThat(result.getCaption()).isEqualTo(newCaption);
+
+    }
+
+    @Test
+    void shouldNotUpdatePostCaptionBecausePostNotFound(){
+
+        // Given
+        ApplicationUser user = ApplicationUser.builder().id(1L).username("testuser").build();
+
+        given(securityUtils.getCurrentAuth()).willReturn(user);
+        given(postRepository.findById(any())).willReturn(Optional.empty());
+
+        UUID id = UUID.randomUUID();
+
+        // Then
+        assertThatThrownBy(() -> underTest.updatePostCaption(id, "New caption!"))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(postRepository).findById(id);
+        verify(postRepository, never()).save(any());
+
+    }
+
+    @Test
+    void shouldNotUpdatePostCaptionBecauseUserNotOwner(){
+
+        // Given
+        ApplicationUser user1 = ApplicationUser.builder().id(1L).username("testuser").build();
+        Post p1 = Post.builder() // Post owned by user1
+                .id(UUID.randomUUID()).caption("Post 1").user(user1).postMedia(null).build();
+
+        ApplicationUser user2 = ApplicationUser.builder().id(2L).username("testuser").build();
+
+        // User2 is trying to update
+        given(securityUtils.getCurrentAuth()).willReturn(user2);
+        given(postRepository.findById(any())).willReturn(Optional.of(p1));
+
+        // Then
+        assertThatThrownBy(() -> underTest.updatePostCaption(p1.getId(), "New caption!"))
+                .isInstanceOf(ActionNotPermittedException.class);
+
+        verify(postRepository).findById(p1.getId());
+        verify(postRepository, never()).save(any());
 
     }
 
