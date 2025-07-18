@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
+
 @Component
 public class SecurityUtils {
 
@@ -29,6 +31,14 @@ public class SecurityUtils {
         }
 
         return user;
+
+    }
+
+    public int generateVerificationCode() {
+
+        SecureRandom random = new SecureRandom();
+
+        return random.nextInt(900000) + 100000;
 
     }
 }

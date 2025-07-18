@@ -1,11 +1,8 @@
 package com.cdcrane.social_konnect_backend.authentication;
 
-import com.cdcrane.social_konnect_backend.authentication.dto.LoginDTO;
-import com.cdcrane.social_konnect_backend.authentication.dto.LoginResponseDTO;
-import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
-import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationResponseDTO;
+import com.cdcrane.social_konnect_backend.authentication.dto.*;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.cdcrane.social_konnect_backend.users.UserService;
+import com.cdcrane.social_konnect_backend.users.UserUseCase;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -26,10 +23,10 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final UserService userService;
+    private final UserUseCase userService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JWTUtil jwtUtil, UserService userService) {
+    public AuthController(AuthenticationManager authenticationManager, JWTUtil jwtUtil, UserUseCase userService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
@@ -44,7 +41,18 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegistrationResponseDTO> register(@Valid @RequestBody RegistrationDTO registerDTO, HttpServletRequest request){
 
-        ApplicationUser user = userService.registerUser(registerDTO, true);
+        ApplicationUser user = userService.registerUser(registerDTO, false);
+
+        return ResponseEntity.ok().body(new RegistrationResponseDTO(user.getId(), user.getUsername(), user.getEmail(), user.isEnabled()));
+
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<RegistrationResponseDTO> verify(@Valid @RequestBody VerifyEmailDTO verifyDTO, HttpServletRequest request){
+
+        ApplicationUser user = userService.checkVerificationCode(verifyDTO.username(), verifyDTO.verificationCode());
+
+        RegistrationResponseDTO response = new RegistrationResponseDTO(user.getId(), user.getUsername(), user.getEmail(), user.isEnabled());
 
         Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), null,
                 user.getRoles().stream()
@@ -58,7 +66,7 @@ public class AuthController {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
 
-        return ResponseEntity.ok().headers(headers).body(new RegistrationResponseDTO(user.getId(), user.getUsername(), user.getEmail(), user.isEnabled()));
+        return ResponseEntity.ok().headers(headers).body(response);
 
     }
 

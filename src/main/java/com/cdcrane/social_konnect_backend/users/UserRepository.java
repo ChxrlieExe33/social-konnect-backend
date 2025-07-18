@@ -10,6 +10,9 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
 
     Optional<ApplicationUser> findByUsername(String username);
 
+    @Query("SELECT u FROM ApplicationUser u JOIN FETCH u.roles WHERE u.username = ?1")
+    Optional<ApplicationUser> findByUsernameWithRoles(String username);
+
     @Query("SELECT u FROM ApplicationUser u JOIN FETCH u.roles")
     List<ApplicationUser> findAllWithRoles();
 

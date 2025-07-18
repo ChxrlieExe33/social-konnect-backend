@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.config.exceptionhandlers;
 
+import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidException;
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
@@ -224,6 +225,19 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleInvalidVerificationCodeException(InvalidVerificationCodeException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
     }
 
 }

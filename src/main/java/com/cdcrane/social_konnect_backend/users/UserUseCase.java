@@ -14,4 +14,6 @@ public interface UserUseCase extends UserDetailsService {
     ApplicationUser getUserByUsernameWithRoles(String username);
 
     ApplicationUser getUserByUsernameOnlyUserSummary(String username);
+
+    ApplicationUser checkVerificationCode(String username, int verificationCode);
 }

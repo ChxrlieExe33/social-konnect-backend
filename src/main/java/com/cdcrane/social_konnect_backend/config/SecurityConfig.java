@@ -26,7 +26,8 @@ public class SecurityConfig {
     public static final String[] PUBLIC_URIS = {
             "/error",
             "/api/auth/login",
-            "/api/auth/register"
+            "/api/auth/register",
+            "/api/auth/verify",
     };
 
     @Autowired

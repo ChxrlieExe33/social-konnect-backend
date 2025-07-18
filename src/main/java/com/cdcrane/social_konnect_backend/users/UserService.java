@@ -1,6 +1,11 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
+import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
+import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
+import com.cdcrane.social_konnect_backend.config.SecurityUtils;
+import com.cdcrane.social_konnect_backend.config.email.EmailUseCase;
+import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.roles.Role;
@@ -11,6 +16,7 @@ import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenExceptio
 import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,12 +33,16 @@ public class UserService implements UserUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final RoleRepository roleRepo;
+    private final SecurityUtils securityUtils;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo) {
+    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.roleRepo = roleRepo;
+        this.securityUtils = securityUtils;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -41,6 +51,8 @@ public class UserService implements UserUseCase {
      * @param enabled The status you need the “enabled” field to be set to.
      * @return A newly persisted ApplicationUser object.
      */
+    @Override
+    @Transactional
     public ApplicationUser registerUser(RegistrationDTO registration, boolean enabled){
 
         boolean alreadyExists = userRepository.existsByUsername(registration.username());
@@ -65,8 +77,46 @@ public class UserService implements UserUseCase {
                 .email(registration.email())
                 .roles(List.of(userRole))
                 .enabled(enabled)
+                .verificationCode(securityUtils.generateVerificationCode())
                 .build();
 
+        eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getVerificationCode()));
+
+        return userRepository.save(user);
+
+    }
+
+    /**
+     * Method to check a user's verification code, for email verification.
+     * @param username The username.
+     * @param verificationCode The verification code to check if it is valid.
+     * @return An ApplicationUser with the enabled status set to true.
+     */
+    @Override
+    public ApplicationUser checkVerificationCode(String username, int verificationCode) {
+
+        ApplicationUser user = userRepository.findByUsernameWithRoles(username)
+                .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+
+        if (user.isEnabled()) {
+
+            throw new ActionNotPermittedException("User " + username + " is already enabled, no need to verify.");
+        }
+
+        if (verificationCode != user.getVerificationCode()) {
+
+            int newCode = securityUtils.generateVerificationCode();
+
+            user.setVerificationCode(newCode);
+            ApplicationUser newUser = userRepository.save(user);
+
+            eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), newCode));
+
+            throw new InvalidVerificationCodeException("Invalid verification code, please try again. A new code has been sent to " + user.getEmail() + ".");
+
+        }
+
+        user.setEnabled(true);
         return userRepository.save(user);
 
     }

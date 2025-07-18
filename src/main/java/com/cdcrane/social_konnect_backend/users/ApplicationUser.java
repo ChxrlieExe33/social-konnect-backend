@@ -54,13 +54,7 @@ public class ApplicationUser {
     @JsonIgnoreProperties("user")
     private List<Post> posts;
 
-    public void addPost(Post post){
-
-        if (this.posts == null){
-            this.posts = new LinkedList<>();
-        }
-
-        this.posts.add(post);
-    }
+    @Column(name = "verification_code", nullable = true)
+    private int verificationCode;
 
 }
