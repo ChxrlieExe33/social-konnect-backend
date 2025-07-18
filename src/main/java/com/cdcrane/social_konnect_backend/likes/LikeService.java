@@ -68,12 +68,18 @@ public class LikeService implements LikeUseCase {
     @Override
     public int getLikeCountByPostId(UUID postId) {
 
+        postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get like count."));
+
         return likeRepository.countByPostId(postId);
 
     }
 
     @Override
     public Page<String> getUsernamesWhoLikePost(UUID postId, Pageable pageable) {
+
+        postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get like count."));
 
         return likeRepository.getUsernamesWhoLikePost(postId, pageable);
 
