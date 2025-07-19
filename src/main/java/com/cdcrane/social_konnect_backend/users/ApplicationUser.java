@@ -55,6 +55,6 @@ public class ApplicationUser {
     private List<Post> posts;
 
     @Column(name = "verification_code", nullable = true)
-    private int verificationCode;
+    private Integer verificationCode; // Must be Integer not int, since it can be null, int cannot contain null, if you try read from db to user, it will cause problem.
 
 }

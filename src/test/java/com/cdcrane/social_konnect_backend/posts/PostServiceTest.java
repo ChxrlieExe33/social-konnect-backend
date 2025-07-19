@@ -147,14 +147,6 @@ class PostServiceTest {
         // Create mock multipart file
         MultipartFile mockFile = Mockito.mock(MultipartFile.class);
 
-        // Configure the mock file (need this to test filehandler)
-        /*
-        when(mockFile.isEmpty()).thenReturn(false);
-        when(mockFile.getOriginalFilename()).thenReturn("test-file.png");
-        when(mockFile.getContentType()).thenReturn("image/png");
-        when(mockFile.getSize()).thenReturn(1024L);
-        when(mockFile.getName()).thenReturn("file");*/
-
         CreatePostDTO dto = new CreatePostDTO("Test caption", List.of(mockFile));
 
         PostMedia media = new PostMedia(UUID.randomUUID(), "http://test.com", "IMAGE", "generated_name.png");
