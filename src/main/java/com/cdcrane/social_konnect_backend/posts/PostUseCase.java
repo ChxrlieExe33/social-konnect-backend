@@ -12,6 +12,8 @@ public interface PostUseCase {
 
     Page<Post> getPostsByUsername(String username, Pageable pageable);
 
+    Post getPostById(UUID postId);
+
     Post savePost(CreatePostDTO createPostDTO);
 
     void deletePost(UUID postId);

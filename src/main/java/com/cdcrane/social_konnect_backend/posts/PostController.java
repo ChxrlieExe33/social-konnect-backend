@@ -46,6 +46,17 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDTO> getPostById(@PathVariable UUID postId){
+
+        Post post = postUseCase.getPostById(postId);
+
+        PostDTO response = convertPostToPostDTO(post);
+
+        return ResponseEntity.ok(response);
+
+    }
+
     // Have to use @ModelAttribute instead of @RequestBody to allow form-data
     // instead of raw JSON, since it contains files and content.
     @PostMapping
@@ -70,7 +81,7 @@ public class PostController {
 
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/user/{username}")
     public ResponseEntity<Page<PostDTO>> getPostsByUsername(@PathVariable String username, Pageable pageable){
 
         Page<Post> posts = postUseCase.getPostsByUsername(username, pageable);

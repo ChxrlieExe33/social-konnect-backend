@@ -53,6 +53,16 @@ public class PostService implements PostUseCase {
 
     }
 
+    @Override
+    public Post getPostById(UUID postId) {
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found."));
+
+        return post;
+
+    }
+
     /**
      * Get all posts by username, paginated and ordered by creation date, newest first.
      * @param username The username to search by.

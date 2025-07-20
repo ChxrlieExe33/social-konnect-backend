@@ -10,6 +10,8 @@ import com.cdcrane.social_konnect_backend.posts.PostRepository;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -80,5 +82,27 @@ public class CommentService implements CommentUseCase {
         }
 
         commentRepository.delete(comment);
+    }
+
+    @Override
+    public int getCommentCountByPostId(UUID postId) {
+
+        postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get comment count."));
+
+        return commentRepository.countByPostId(postId);
+
+    }
+
+    @Override
+    public Page<Comment> getCommentsByPostId(UUID postId, Pageable pageable) {
+
+        postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get comments."));
+
+        Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
+
+        return comments;
+
     }
 }

@@ -1,19 +1,17 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
+import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
-import com.cdcrane.social_konnect_backend.posts.Post;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
-import org.hibernate.Hibernate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -21,8 +19,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -40,12 +38,18 @@ class UserServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private SecurityUtils securityUtils;
+
+    @Mock
+    ApplicationEventPublisher eventPublisher;
+
     private UserService underTest;
 
     @BeforeEach
     void setUp(){
 
-        underTest = new UserService(userRepository, new BCryptPasswordEncoder(), roleRepository);
+        underTest = new UserService(userRepository, new BCryptPasswordEncoder(), roleRepository, securityUtils, eventPublisher);
 
     }
 
