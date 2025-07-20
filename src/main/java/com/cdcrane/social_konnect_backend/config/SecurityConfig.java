@@ -22,6 +22,7 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
+    private final CorsConfig corsConfig;
 
     public static final String[] PUBLIC_URIS = {
             "/error",
@@ -31,8 +32,9 @@ public class SecurityConfig {
     };
 
     @Autowired
-    public SecurityConfig(JWTUtil jwtUtil) {
+    public SecurityConfig(JWTUtil jwtUtil, CorsConfig corsConfig) {
         this.jwtUtil = jwtUtil;
+        this.corsConfig = corsConfig;
     }
 
     @Bean
@@ -42,6 +44,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers(PUBLIC_URIS).permitAll() // Permitted or specific routes first.
                 .anyRequest().authenticated()); // .anyRequest always goes last.
+
+
+        http.cors(cors -> cors.configurationSource(corsConfig));
 
         // Disable form login and http basic for JWT auth
         http.formLogin(AbstractHttpConfigurer::disable);
