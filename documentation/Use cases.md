@@ -7,8 +7,8 @@ I will implement these over time, this list might also grow.
 - Sign up to be a user. **(DONE)**
 - Get the user summary (username, bio, pfp). **(DONE)**
 - Get the user summary and list of posts (paginated) for the profile page.
-- Get a list of all posts created by a user (paginated)
-- Update profile data (bio, email, pfp)
+- Get a list of all posts created by a user (paginated) **(DONE)**
+- Update profile data (bio, pfp)
 - Update username (separate to rest)
 - Change password.
 - Delete account.

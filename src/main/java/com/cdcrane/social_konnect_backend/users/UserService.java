@@ -196,5 +196,32 @@ public class UserService implements UserUseCase {
 
     }
 
+    /**
+     * Update the username of an existing User only if the currently authenticated user is the same user.
+     * @param oldName The name of the existing User.
+     * @param newName The new name to assign to the User.
+     * @return An updated ApplicationUser object.
+     */
+    @Override
+    @Transactional
+    public ApplicationUser updateUserName(String oldName, String newName) {
+
+        ApplicationUser userToBeUpdated = userRepository.findByUsernameWithRoles(oldName)
+                .orElseThrow(() -> new UserNotFoundException("User with username " + oldName + " not found"));
+
+
+        ApplicationUser auth = securityUtils.getCurrentAuth();
+
+        if(auth.getId() != userToBeUpdated.getId()){
+
+            throw new ActionNotPermittedException("User " + auth.getUsername() + " is not allowed to update user " + oldName + " as they are not the same user.");
+
+        }
+
+        userToBeUpdated.setUsername(newName);
+
+        return userRepository.save(userToBeUpdated);
+
+    }
 
 }
