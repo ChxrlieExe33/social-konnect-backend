@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.config.exceptionhandlers;
 
 import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.exceptions.ResetInvalidException;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidException;
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
@@ -238,6 +239,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
+    }
+
+    /**
+     * Handle bad password reset attempts.
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(ResetInvalidException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleResetInvalidException(ResetInvalidException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
 }

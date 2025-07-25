@@ -1,6 +1,11 @@
 package com.cdcrane.social_konnect_backend.authentication;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.*;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.PasswordResetUseCase;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.dto.PasswordResetFinalResponse;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.dto.PasswordResetRequestResponseDTO;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.dto.SubmitNewPasswordDTO;
+import com.cdcrane.social_konnect_backend.authentication.password_reset.dto.SubmitResetCodeDTO;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserUseCase;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
@@ -17,6 +22,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -24,12 +31,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final UserUseCase userService;
+    private final PasswordResetUseCase passwordResetUseCase;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JWTUtil jwtUtil, UserUseCase userService) {
+    public AuthController(AuthenticationManager authenticationManager, JWTUtil jwtUtil, UserUseCase userService, PasswordResetUseCase passwordResetUseCase) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.passwordResetUseCase = passwordResetUseCase;
     }
 
     /**
@@ -117,5 +126,35 @@ public class AuthController {
 
         return ResponseEntity.ok(summary);
     }
+
+    // ------------------------- PASSWORD RESET FUNCTIONALITY -------------------------
+
+    @PostMapping("/resetpassword/{username}")
+    public ResponseEntity<PasswordResetRequestResponseDTO> requestPasswordReset(@PathVariable String username){
+
+        UUID resetId = passwordResetUseCase.sendPasswordResetEmail(username);
+
+        return ResponseEntity.ok(new PasswordResetRequestResponseDTO(resetId, "Password reset email sent."));
+
+    }
+
+    @PostMapping("/resetpassword/verify")
+    public ResponseEntity<PasswordResetRequestResponseDTO> checkResetCode(@RequestBody SubmitResetCodeDTO submitResetCodeDTO){
+
+        passwordResetUseCase.checkResetCode(submitResetCodeDTO.resetId(), submitResetCodeDTO.resetCode());
+
+        return ResponseEntity.ok(new PasswordResetRequestResponseDTO(submitResetCodeDTO.resetId(), "Password reset code verified. Send new password to /auth/resetpassword/submitnew"));
+
+    }
+
+    @PostMapping("/resetpassword/submitnew")
+    public ResponseEntity<PasswordResetFinalResponse> submitNewPassword(@RequestBody SubmitNewPasswordDTO submitNewPasswordDTO){
+
+        passwordResetUseCase.resetPassword(submitNewPasswordDTO.resetId(), submitNewPasswordDTO.newPassword());
+
+        return ResponseEntity.ok(new PasswordResetFinalResponse("Password reset completed. You may now login with your new password."));
+
+    }
+
 
 }
