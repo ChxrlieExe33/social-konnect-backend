@@ -18,4 +18,6 @@ public interface UserUseCase extends UserDetailsService {
     ApplicationUser checkVerificationCode(String username, int verificationCode);
 
     ApplicationUser updateUserName(String oldName, String newName);
+
+    void changePassword(String newPassword);
 }

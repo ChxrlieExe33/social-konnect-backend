@@ -26,10 +26,6 @@ public class SecurityUtils {
         ApplicationUser user = this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User with username " + username + " not found."));
 
-        if (user == null) {
-            throw new UserNotFoundException("User with username " + username + " not found, the current auth is not assigned to a valid user.");
-        }
-
         return user;
 
     }

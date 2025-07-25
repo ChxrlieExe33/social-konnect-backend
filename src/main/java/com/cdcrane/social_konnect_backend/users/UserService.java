@@ -11,6 +11,7 @@ import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
+import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import jakarta.transaction.Transactional;
@@ -221,6 +222,27 @@ public class UserService implements UserUseCase {
         userToBeUpdated.setUsername(newName);
 
         return userRepository.save(userToBeUpdated);
+
+    }
+
+    /**
+     * Change the password of the currently authenticated user, does not require email verification as the user is actually logged in.
+     * @param newPassword
+     */
+    @Override
+    @Transactional
+    public void changePassword(String newPassword) {
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        if(encoder.matches(newPassword, user.getPassword())){
+
+            throw new UnableToChangePasswordException("New password cannot be the same as the current password.");
+        }
+
+        user.setPassword(encoder.encode(newPassword));
+
+        userRepository.save(user);
 
     }
 

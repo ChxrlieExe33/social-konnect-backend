@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
+import com.cdcrane.social_konnect_backend.users.dto.ChangePasswordDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UpdateUsernameDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,15 @@ public class UserController {
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + updatedJwt);
 
         return ResponseEntity.status(200).headers(headers).body(response);
+
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<Void> updateUserPassword(@RequestBody ChangePasswordDTO changePasswordDTO){
+
+        userService.changePassword(changePasswordDTO.newPassword());
+
+        return ResponseEntity.ok().build();
 
     }
 

@@ -10,6 +10,7 @@ import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorRespons
 import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
 import com.cdcrane.social_konnect_backend.likes.exceptions.UnableToLikeException;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
+import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
 import org.springframework.http.HttpStatus;
@@ -256,6 +257,18 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UnableToChangePasswordException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleUnableToChangePasswordException(UnableToChangePasswordException ex) {
+
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.CONFLICT.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
 }
