@@ -4,6 +4,7 @@ import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
 import com.cdcrane.social_konnect_backend.users.dto.ChangePasswordDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UpdateUsernameDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class UserController {
     }
 
     @PutMapping("/username")
-    public ResponseEntity<UserSummaryDTO> updateUserName(@RequestBody UpdateUsernameDTO dto){
+    public ResponseEntity<UserSummaryDTO> updateUserName(@RequestBody @Valid UpdateUsernameDTO dto){
 
         ApplicationUser updated = userService.updateUserName(dto.oldName(), dto.newName());
 

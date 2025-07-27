@@ -87,7 +87,7 @@ public class AuthController {
      * @return Response object stating the status of the authentication.
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginDTO loginDTO, HttpServletRequest request){
 
         // This constructor sets “authenticated” to false.
         Authentication auth = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
