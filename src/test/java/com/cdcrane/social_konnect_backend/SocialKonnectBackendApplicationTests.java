@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend;
 
 import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
+import com.cdcrane.social_konnect_backend.config.CorsConfig;
 import com.cdcrane.social_konnect_backend.config.SecurityConfig;
 import com.cdcrane.social_konnect_backend.config.email.EmailUseCase;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class SocialKonnectBackendApplicationTests {
 
     @MockBean
     private EmailUseCase emailUseCase;
+
+    @MockBean
+    private CorsConfig corsConfig;
 
     @Test
     void contextLoads() {

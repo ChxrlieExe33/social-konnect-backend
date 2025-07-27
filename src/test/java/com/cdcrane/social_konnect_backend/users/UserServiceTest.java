@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
+import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.roles.Role;
@@ -193,6 +194,8 @@ class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
 
         ApplicationUser result = userCaptor.getValue();
+
+        verify(eventPublisher).publishEvent(any(VerificationCodeCreatedEvent.class));
 
         assertThat(result.getUsername()).isEqualTo(dto.username());
         assertThat(result.getEmail()).isEqualTo(dto.email());
