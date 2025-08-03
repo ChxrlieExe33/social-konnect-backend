@@ -54,7 +54,7 @@ public class UserController {
         // We have to update the auth, since the old JWT will no longer be valid because it has the old username, the client must swap the JWT.
         Authentication updatedAuth = new UsernamePasswordAuthenticationToken(updated.getUsername(), null, updated.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).toList());
 
-        String updatedJwt = jWTUtil.createNewJwt(updatedAuth);
+        String updatedJwt = jWTUtil.createNewJwt(updatedAuth).token();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + updatedJwt);

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -70,7 +71,7 @@ public class AuthController {
 
         SecurityContextHolder.getContext().setAuthentication(auth);
 
-        String jwt = jwtUtil.createNewJwt(auth);
+        String jwt = jwtUtil.createNewJwt(auth).token();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
@@ -96,16 +97,16 @@ public class AuthController {
 
             Authentication authentication = authenticationManager.authenticate(auth);
 
-            String jwt = jwtUtil.createNewJwt(authentication);
+            JwtData data = jwtUtil.createNewJwt(authentication);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
+            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + data.token());
 
-            return ResponseEntity.ok().headers(headers).body(new LoginResponseDTO("Authentication completed"));
+            return ResponseEntity.ok().headers(headers).body(new LoginResponseDTO("Authentication successful", data.username(), data.expirationDate()));
 
         } catch (AuthenticationException e) {
 
-            return ResponseEntity.status(401).body(new LoginResponseDTO("Authentication failed, reason: " + e.getMessage()));
+            throw new BadCredentialsException("Invalid username or password provided.");
 
         }
 

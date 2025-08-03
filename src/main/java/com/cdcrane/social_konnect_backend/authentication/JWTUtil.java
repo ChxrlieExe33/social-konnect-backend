@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.authentication;
 
+import com.cdcrane.social_konnect_backend.authentication.dto.JwtData;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -49,7 +50,9 @@ public class JWTUtil {
      * @param auth Authentication object containing user details.
      * @return The JWT for the user to access restricted endpoints.
      */
-    public String createNewJwt(Authentication auth){
+    public JwtData createNewJwt(Authentication auth){
+
+        Date expiration = new Date(System.currentTimeMillis() + jwtExpirationInMs);
 
         String jwt = Jwts.builder()
                 .issuer(jwtIssuer)
@@ -59,11 +62,13 @@ public class JWTUtil {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(","))) // Only get authority “name” from each, separate with comma
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpirationInMs)) // About 8 hours
+                .expiration(expiration) // About 8 hours
                 .signWith(secretKey)
                 .compact();
 
-        return jwt;
+        var response = new JwtData(jwt, auth.getName(), expiration);
+
+        return response;
     }
 
     /**
