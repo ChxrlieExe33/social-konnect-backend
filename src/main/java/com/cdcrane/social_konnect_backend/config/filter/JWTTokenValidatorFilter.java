@@ -79,6 +79,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
             if (request.getRequestURI().equals(uri)){
                 return true;
             }
+            if (request.getRequestURI().startsWith("/media/")) {
+                return true;
+            }
         }
 
         return false;
