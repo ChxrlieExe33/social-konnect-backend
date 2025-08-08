@@ -37,7 +37,7 @@ public class UserController {
         var users = userService.getAllUsers();
 
         List<UserSummaryDTO> userSummaries = users.stream()
-                .map(user -> new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio()))
+                .map(user -> new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio(), user.getProfilePictureUrl()))
                 .toList();
 
         return ResponseEntity.ok(userSummaries);
@@ -49,7 +49,7 @@ public class UserController {
 
         ApplicationUser updated = userService.updateUserName(dto.oldName(), dto.newName());
 
-        var response = new UserSummaryDTO(updated.getId(), updated.getUsername(), updated.getEmail(), updated.getBio());
+        var response = new UserSummaryDTO(updated.getId(), updated.getUsername(), updated.getEmail(), updated.getBio(), updated.getProfilePictureUrl());
 
         // We have to update the auth, since the old JWT will no longer be valid because it has the old username, the client must swap the JWT.
         Authentication updatedAuth = new UsernamePasswordAuthenticationToken(updated.getUsername(), null, updated.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).toList());

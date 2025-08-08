@@ -69,7 +69,7 @@ public class PostController {
 
             // Return media as empty list
             return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
-                    List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt()));
+                    List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt(), null));
 
         }
 
@@ -77,7 +77,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
                 savedPost.getPostMedia().stream()
                         .map(m -> new PostMediaDTO(m.getMediaUrl(), m.getMediaType())).toList(),
-                savedPost.getUser().getUsername(), savedPost.getPostedAt()));
+                savedPost.getUser().getUsername(), savedPost.getPostedAt(), null));
 
     }
 
@@ -121,7 +121,7 @@ public class PostController {
         return new PostDTO(post.getId(), post.getCaption(),
                 post.getPostMedia().stream()
                         .map(media -> new PostMediaDTO(media.getMediaUrl(), media.getMediaType())).collect(Collectors.toList()),
-                post.getUser().getUsername(), post.getPostedAt());
+                post.getUser().getUsername(), post.getPostedAt(), post.getUser().getProfilePictureUrl());
     }
 
 }

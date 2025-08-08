@@ -6,5 +6,5 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public record PostDTO(UUID postId, String caption, List<PostMediaDTO> media, String username, Instant createdAt) {
+public record PostDTO(UUID postId, String caption, List<PostMediaDTO> media, String username, Instant createdAt, String profilePictureUrl) {
 }

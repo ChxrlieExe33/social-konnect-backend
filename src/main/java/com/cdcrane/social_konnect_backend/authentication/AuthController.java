@@ -9,7 +9,6 @@ import com.cdcrane.social_konnect_backend.authentication.password_reset.dto.Subm
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserUseCase;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -45,11 +44,10 @@ public class AuthController {
     /**
      * For registering new users, on successful authentication, provides user information and a JWT.
      * @param registerDTO RegistrationDTO containing basic user information.
-     * @param request Request sent.
      * @return A registration response containing user information and an authorization header.
      */
     @PostMapping("/register")
-    public ResponseEntity<RegistrationResponseDTO> register(@Valid @RequestBody RegistrationDTO registerDTO, HttpServletRequest request){
+    public ResponseEntity<RegistrationResponseDTO> register(@Valid @RequestBody RegistrationDTO registerDTO){
 
         ApplicationUser user = userService.registerUser(registerDTO, false);
 
@@ -58,7 +56,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<RegistrationResponseDTO> verify(@Valid @RequestBody VerifyEmailDTO verifyDTO, HttpServletRequest request){
+    public ResponseEntity<RegistrationResponseDTO> verify(@Valid @RequestBody VerifyEmailDTO verifyDTO){
 
         ApplicationUser user = userService.checkVerificationCode(verifyDTO.username(), verifyDTO.verificationCode());
 
@@ -84,11 +82,10 @@ public class AuthController {
     /**
      * For authenticating existing users and providing a JWT in the Authorization header.
      * @param loginDTO User details for a login.
-     * @param request The request sent.
      * @return Response object stating the status of the authentication.
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginDTO loginDTO, HttpServletRequest request){
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginDTO loginDTO){
 
         // This constructor sets “authenticated” to false.
         Authentication auth = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
@@ -113,7 +110,7 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserSummaryDTO> getCurrentUser(HttpServletRequest request){
+    public ResponseEntity<UserSummaryDTO> getCurrentUser(){
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -123,7 +120,7 @@ public class AuthController {
 
         ApplicationUser user = userService.getUserByUsernameWithRoles(auth.getName());
 
-        UserSummaryDTO summary = new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio());
+        UserSummaryDTO summary = new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio(), user.getProfilePictureUrl());
 
         return ResponseEntity.ok(summary);
     }
