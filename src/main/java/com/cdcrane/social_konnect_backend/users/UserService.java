@@ -133,7 +133,7 @@ public class UserService implements UserUseCase {
     @Transactional // Has to be transactional to keep the Hibernate session open for lazy loading.
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        ApplicationUser u = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));
+        ApplicationUser u = userRepository.findByUsernameOrEmail(username).orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));
 
         // Initialize roles since they are lazily loaded
         Hibernate.initialize(u.getRoles());

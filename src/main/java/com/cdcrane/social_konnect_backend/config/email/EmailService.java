@@ -19,14 +19,16 @@ public class EmailService implements EmailUseCase {
     @Value("${spring.mail.password}")
     private String senderPassword;
 
+    @Value("${spring.mail.host}")
+    private String mailHost;
+
+    @Value("${spring.mail.port}")
+    private int mailPort;
+
     @Override
     public void sendVerificationEmail(String email, int verificationCode) {
 
-        Properties props = new Properties();
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
+        Properties props = prepareProperties();
 
         Session session = Session.getInstance(props, new Authenticator() {
                 @Override
@@ -54,6 +56,17 @@ public class EmailService implements EmailUseCase {
 
         }
 
+    }
+
+    private Properties prepareProperties() {
+
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", mailHost);
+        props.put("mail.smtp.port", String.valueOf(mailPort));
+
+        return props;
     }
 
 }
