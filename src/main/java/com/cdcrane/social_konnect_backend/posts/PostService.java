@@ -6,15 +6,13 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundExce
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.cdcrane.social_konnect_backend.users.UserRepository;
-import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -182,6 +180,14 @@ public class PostService implements PostUseCase {
         post.setCaption(cleanCaption);
 
         return postRepo.save(post);
+
+    }
+
+    @Override
+    public PostMetadataDTO getPostMetadataByPostId(UUID postId) {
+
+        return this.postRepo.getPostMetadataByPostId(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get metadata."));
 
     }
 }

@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.posts;
 
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,4 +20,6 @@ public interface PostUseCase {
     void deletePost(UUID postId);
 
     Post updatePostCaption(UUID postId, String caption);
+
+    PostMetadataDTO getPostMetadataByPostId(UUID postId);
 }

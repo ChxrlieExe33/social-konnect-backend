@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.posts;
 
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.UpdatePostCaptionDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,6 +111,15 @@ public class PostController {
         PostDTO response = convertPostToPostDTO(post);
 
         return ResponseEntity.ok(response);
+
+    }
+
+    @GetMapping("/metadata/{postId}")
+    public ResponseEntity<PostMetadataDTO> getPostMetadataByPostId(@PathVariable UUID postId){
+
+        PostMetadataDTO postMetadata = postUseCase.getPostMetadataByPostId(postId);
+
+        return ResponseEntity.ok(postMetadata);
 
     }
 
