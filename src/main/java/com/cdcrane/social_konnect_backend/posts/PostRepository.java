@@ -1,12 +1,15 @@
 package com.cdcrane.social_konnect_backend.posts;
 
+import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,4 +35,16 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
         GROUP BY p.id
     """)
     Optional<PostMetadataDTO> getPostMetadataByPostId(UUID postId);
+
+    @Query("""
+        SELECT new com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO(
+            p.id,
+            CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+        )
+        FROM Post p
+        LEFT JOIN Like l ON l.post.id = p.id AND l.user.id = :userId
+        WHERE p.id IN :postIds
+    """)
+    List<PostLikeStatusDTO> findLikeStatusByPostIds(@Param("postIds") List<UUID> postIds, @Param("userId") Long userId);
+
 }

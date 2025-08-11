@@ -12,7 +12,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -41,7 +40,7 @@ public class CommentService implements CommentUseCase {
     @Transactional
     public Comment addCommentToPostByPostId(AddCommentDTO addCommentDTO) {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        //String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         ApplicationUser user = securityUtils.getCurrentAuth();
 
@@ -57,7 +56,7 @@ public class CommentService implements CommentUseCase {
         comment.setUser(user);
         comment.setPost(post);
 
-        return comment = commentRepository.save(comment);
+        return commentRepository.save(comment);
 
     }
 
@@ -100,7 +99,7 @@ public class CommentService implements CommentUseCase {
         postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get comments."));
 
-        Page<Comment> comments = commentRepository.findByPostId(postId, pageable);
+        Page<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtDesc(postId, pageable);
 
         return comments;
 

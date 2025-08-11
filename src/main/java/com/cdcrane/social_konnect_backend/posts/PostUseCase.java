@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.posts;
 
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostDTOWithLiked;
 import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,10 @@ public interface PostUseCase {
 
     Page<Post> getPostsByUsername(String username, Pageable pageable);
 
+    Page<PostDTOWithLiked> getPostsWithLiked(Pageable pageable);
+
+    Page<PostDTOWithLiked> getPostsWithLikedByUsername(String username, Pageable pageable);
+
     Post getPostById(UUID postId);
 
     Post savePost(CreatePostDTO createPostDTO);
@@ -22,4 +27,5 @@ public interface PostUseCase {
     Post updatePostCaption(UUID postId, String caption);
 
     PostMetadataDTO getPostMetadataByPostId(UUID postId);
+
 }

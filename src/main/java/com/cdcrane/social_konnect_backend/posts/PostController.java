@@ -1,9 +1,6 @@
 package com.cdcrane.social_konnect_backend.posts;
 
-import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
-import com.cdcrane.social_konnect_backend.posts.dto.PostDTO;
-import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
-import com.cdcrane.social_konnect_backend.posts.dto.UpdatePostCaptionDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.*;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,6 +24,8 @@ public class PostController {
     public PostController(PostUseCase postUseCase) {
         this.postUseCase = postUseCase;
     }
+
+    // -------------------------------- GET mappings --------------------------------
 
     @GetMapping("/hidden_hello")
     public ResponseEntity<String> sayHiddenHello(){
@@ -58,6 +57,47 @@ public class PostController {
 
     }
 
+    @GetMapping("/metadata/{postId}")
+    public ResponseEntity<PostMetadataDTO> getPostMetadataByPostId(@PathVariable UUID postId){
+
+        PostMetadataDTO postMetadata = postUseCase.getPostMetadataByPostId(postId);
+
+        return ResponseEntity.ok(postMetadata);
+
+    }
+
+    @GetMapping("/all-with-liked-check")
+    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLiked(Pageable pageable){
+
+        Page<PostDTOWithLiked> posts = postUseCase.getPostsWithLiked(pageable);
+
+        return ResponseEntity.ok(posts);
+
+    }
+
+    @GetMapping("/by-username-with-liked-check/{username}")
+    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLikedByUsername(@PathVariable String username, Pageable pageable){
+
+        Page<PostDTOWithLiked> posts = postUseCase.getPostsWithLikedByUsername(username, pageable);
+
+        return ResponseEntity.ok(posts);
+
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<Page<PostDTO>> getPostsByUsername(@PathVariable String username, Pageable pageable){
+
+        Page<Post> posts = postUseCase.getPostsByUsername(username, pageable);
+
+        // Map each Post in the Page to PostDTO
+        var response = posts.map(this::convertPostToPostDTO);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    // -------------------------------- POST mappings --------------------------------
+
     // Have to use @ModelAttribute instead of @RequestBody to allow form-data
     // instead of raw JSON, since it contains files and content.
     @PostMapping
@@ -82,17 +122,8 @@ public class PostController {
 
     }
 
-    @GetMapping("/user/{username}")
-    public ResponseEntity<Page<PostDTO>> getPostsByUsername(@PathVariable String username, Pageable pageable){
 
-        Page<Post> posts = postUseCase.getPostsByUsername(username, pageable);
-
-        // Map each Post in the Page to PostDTO
-        var response = posts.map(this::convertPostToPostDTO);
-
-        return ResponseEntity.ok(response);
-
-    }
+    // -------------------------------- DELETE mappings --------------------------------
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID postId){
@@ -102,6 +133,8 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
     }
+
+    // -------------------------------- PUT mappings --------------------------------
 
     @PutMapping("/{postId}")
     public ResponseEntity<PostDTO> updatePostCaption(@PathVariable UUID postId, @RequestBody UpdatePostCaptionDTO caption){
@@ -114,17 +147,8 @@ public class PostController {
 
     }
 
-    @GetMapping("/metadata/{postId}")
-    public ResponseEntity<PostMetadataDTO> getPostMetadataByPostId(@PathVariable UUID postId){
 
-        PostMetadataDTO postMetadata = postUseCase.getPostMetadataByPostId(postId);
-
-        return ResponseEntity.ok(postMetadata);
-
-    }
-
-
-    // ---------------------------- HELPER METHODS ----------------------------
+    // -------------------------------- HELPER METHODS --------------------------------
 
     private PostDTO convertPostToPostDTO(Post post){
 

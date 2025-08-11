@@ -6,9 +6,12 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundExce
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostDTOWithLiked;
+import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
+import com.cdcrane.social_konnect_backend.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,7 +20,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService implements PostUseCase {
@@ -25,13 +30,17 @@ public class PostService implements PostUseCase {
     private final PostRepository postRepo;
     private final SecurityUtils securityUtils;
     private final FileHandler fileHandler;
+    private final UserRepository userRepository;
 
     @Autowired
-    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
+    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler, UserRepository userRepository) {
         this.postRepo = postRepo;
         this.securityUtils = securityUtils;
         this.fileHandler = fileHandler;
+        this.userRepository = userRepository;
     }
+
+    // -------------------------------- Retrieve data --------------------------------
 
     /**
      * Get all posts, paginated and ordered by the creation date, newest first.
@@ -82,6 +91,100 @@ public class PostService implements PostUseCase {
     }
 
     /**
+     * Retrieve a Page of PostDTO with the addition of a check if the user sending the request has liked these posts.
+     * @param pageable For pagination
+     * @return A Page of PostDTOWithLiked containing post-data and the liked boolean.
+     */
+    @Override
+    public Page<PostDTOWithLiked> getPostsWithLiked(Pageable pageable) {
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        Page<Post> postsPage = this.postRepo.getPostsOrderByPostedAt(pageable);
+
+        if(postsPage.isEmpty()) {
+            throw new ResourceNotFoundException("No posts found");
+        }
+
+        // Extract IDs
+        List<UUID> postIds = postsPage.getContent().stream()
+                .map(Post::getId)
+                .toList();
+
+        // Get like status of these posts
+        List<PostLikeStatusDTO> likeStatuses = postRepo.findLikeStatusByPostIds(postIds, user.getId());
+
+        Map<UUID, Boolean> likeStatusMap = likeStatuses.stream()
+                .collect(Collectors.toMap(
+                        PostLikeStatusDTO::postId,
+                        PostLikeStatusDTO::liked
+                ));
+
+        return postsPage.map(post -> {
+            boolean liked = likeStatusMap.getOrDefault(post.getId(), false);
+            return new PostDTOWithLiked(post, liked);
+        });
+
+    }
+
+    /**
+     * Retrieve a Page of PostDTO by the username of the poster who posted them,
+     * with the addition of a check if the user sending the request has liked these posts.
+     * @param username Whose posts we want to see.
+     * @param pageable For pagination
+     * @return A Page of PostDTOWithLiked containing post-data and the liked boolean.
+     */
+    @Override
+    public Page<PostDTOWithLiked> getPostsWithLikedByUsername(String username, Pageable pageable) {
+
+        Page<Post> postsPage = this.postRepo.getPostsByUsernameOrderByPostedAt(username, pageable);
+
+        // Get the current user for the like check.
+        ApplicationUser currentAuthUser = securityUtils.getCurrentAuth();
+
+
+        if(postsPage.isEmpty()) {
+            throw new ResourceNotFoundException("No posts found");
+        }
+
+        // Extract IDs
+        List<UUID> postIds = postsPage.getContent().stream()
+                .map(Post::getId)
+                .toList();
+
+        // Get like status of these posts
+        List<PostLikeStatusDTO> likeStatuses = postRepo.findLikeStatusByPostIds(postIds, currentAuthUser.getId());
+
+        Map<UUID, Boolean> likeStatusMap = likeStatuses.stream()
+                .collect(Collectors.toMap(
+                        PostLikeStatusDTO::postId,
+                        PostLikeStatusDTO::liked
+                ));
+
+        return postsPage.map(post -> {
+            boolean liked = likeStatusMap.getOrDefault(post.getId(), false);
+            return new PostDTOWithLiked(post, liked);
+        });
+
+    }
+
+    /**
+     * Get the metadata of a post, including the like and comment count for now.
+     * @param postId Target post-ID.
+     * @return The metadata in DTO form.
+     */
+    @Override
+    public PostMetadataDTO getPostMetadataByPostId(UUID postId) {
+
+        return this.postRepo.getPostMetadataByPostId(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get metadata."));
+
+    }
+
+
+    // -------------------------------- Create data --------------------------------
+
+    /**
      * Save a new post in the database, along with media if present.
      * @param createPostDTO A DTO containing Post information to persist.
      * @return The Post object saved.
@@ -122,6 +225,8 @@ public class PostService implements PostUseCase {
 
     }
 
+    // -------------------------------- Delete data --------------------------------
+
     /**
      * Delete a post by its ID, only user who created Post can delete the post.
      * @param postId ID of the Post.
@@ -156,6 +261,8 @@ public class PostService implements PostUseCase {
 
     }
 
+    // -------------------------------- Update data --------------------------------
+
     /**
      * Update the caption of a Post by specifying the Post ID.
      * @param postId ID of the Post.
@@ -183,11 +290,4 @@ public class PostService implements PostUseCase {
 
     }
 
-    @Override
-    public PostMetadataDTO getPostMetadataByPostId(UUID postId) {
-
-        return this.postRepo.getPostMetadataByPostId(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found, cannot get metadata."));
-
-    }
 }

@@ -68,14 +68,14 @@ class UserServiceTest {
                 .roles(List.of(role))
                 .build();
 
-        given(userRepository.findByUsername(user.getUsername()))
+        given(userRepository.findByUsernameOrEmail(user.getUsername()))
                 .willReturn(Optional.of(user));
 
         // When
         UserDetails result = underTest.loadUserByUsername(user.getUsername());
 
         // Then
-        verify(userRepository).findByUsername(user.getUsername()); // Should call userRepository(findByUsername)
+        verify(userRepository).findByUsernameOrEmail(user.getUsername()); // Should call userRepository(findByUsername)
 
         assertThat(result.getAuthorities()).hasSize(1); // Should have exactly one role
         assertThat(result.getUsername()).isEqualTo(user.getUsername()); // Should have the correct username
@@ -86,13 +86,13 @@ class UserServiceTest {
     void shouldNotLoadUserByUsername(){
 
         // Given
-        given(userRepository.findByUsername("user1")).willReturn(Optional.empty());
+        given(userRepository.findByUsernameOrEmail("user1")).willReturn(Optional.empty());
 
         // When
         assertThatThrownBy(() -> underTest.loadUserByUsername("user1"))
                 .isInstanceOf(UsernameNotFoundException.class); // Check it throws the correct exception
 
-
+        verify(userRepository).findByUsernameOrEmail("user1");
     }
 
     @Test

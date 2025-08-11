@@ -7,6 +7,7 @@ import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
+import com.cdcrane.social_konnect_backend.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,9 +46,12 @@ class PostServiceTest {
     @Mock
     private FileHandler fileHandler;
 
+    @Mock
+    private UserRepository userRepository;
+
     @BeforeEach
     void setUp() {
-        underTest = new PostService(postRepository, securityUtils, fileHandler);
+        underTest = new PostService(postRepository, securityUtils, fileHandler, userRepository);
     }
 
     @Test
@@ -122,8 +126,8 @@ class PostServiceTest {
         assertThat(results.getNumberOfElements()).isEqualTo(1);
         List<Post> resultsList = results.toList();
 
-        assertThat(resultsList.get(0).getCaption()).isEqualTo(p1.getCaption());
-        assertThat(resultsList.get(0).getUser().getUsername()).isEqualTo(user.getUsername());
+        assertThat(resultsList.getFirst().getCaption()).isEqualTo(p1.getCaption());
+        assertThat(resultsList.getFirst().getUser().getUsername()).isEqualTo(user.getUsername());
 
     }
 
@@ -186,8 +190,6 @@ class PostServiceTest {
 
         // Given
         CreatePostDTO dto = new CreatePostDTO("Test caption", null);
-
-        PostMedia media = new PostMedia(UUID.randomUUID(), "http://test.com", "IMAGE", "generated_name.png");
 
         ApplicationUser user = ApplicationUser.builder().id(1L).username("testuser").build();
 
