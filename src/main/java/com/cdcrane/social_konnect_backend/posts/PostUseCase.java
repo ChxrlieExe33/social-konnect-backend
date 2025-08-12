@@ -18,14 +18,16 @@ public interface PostUseCase {
 
     Page<PostDTOWithLiked> getPostsWithLikedByUsername(String username, Pageable pageable);
 
+    PostDTOWithLiked getPostWithLikedById(UUID postId);
+
     Post getPostById(UUID postId);
+
+    PostMetadataDTO getPostMetadataByPostId(UUID postId);
 
     Post savePost(CreatePostDTO createPostDTO);
 
     void deletePost(UUID postId);
 
     Post updatePostCaption(UUID postId, String caption);
-
-    PostMetadataDTO getPostMetadataByPostId(UUID postId);
 
 }

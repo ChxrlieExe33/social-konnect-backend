@@ -181,6 +181,19 @@ public class PostService implements PostUseCase {
 
     }
 
+    @Override
+    public PostDTOWithLiked getPostWithLikedById(UUID postId) {
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found."));
+
+        PostLikeStatusDTO likeStatus = postRepo.findLikeStatusByPostId(postId, user.getId());
+
+        return new PostDTOWithLiked(post, likeStatus.liked());
+
+    }
 
     // -------------------------------- Create data --------------------------------
 

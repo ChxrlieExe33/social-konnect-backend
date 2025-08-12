@@ -47,4 +47,15 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     """)
     List<PostLikeStatusDTO> findLikeStatusByPostIds(@Param("postIds") List<UUID> postIds, @Param("userId") Long userId);
 
+    @Query("""
+        SELECT new com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO(
+            p.id,
+            CASE WHEN l.id IS NOT NULL THEN true ELSE false END
+        )
+        FROM Post p
+        LEFT JOIN Like l ON l.post.id = p.id AND l.user.id = :userId
+        WHERE p.id = :postId
+    """)
+    PostLikeStatusDTO findLikeStatusByPostId(@Param("postId") UUID postId, @Param("userId") Long userId);
+
 }

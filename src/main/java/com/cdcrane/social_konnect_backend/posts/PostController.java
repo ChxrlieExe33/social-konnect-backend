@@ -96,6 +96,15 @@ public class PostController {
 
     }
 
+    @GetMapping("/with-liked/{postId}")
+    public ResponseEntity<PostDTOWithLiked> getPostLikeStatus(@PathVariable UUID postId){
+
+        PostDTOWithLiked response = postUseCase.getPostWithLikedById(postId);
+
+        return ResponseEntity.ok(response);
+
+    }
+
     // -------------------------------- POST mappings --------------------------------
 
     // Have to use @ModelAttribute instead of @RequestBody to allow form-data
