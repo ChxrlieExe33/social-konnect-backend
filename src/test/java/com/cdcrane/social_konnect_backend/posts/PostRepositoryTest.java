@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,13 +83,15 @@ class PostRepositoryTest {
     }
 
     @Test
-    void shouldGetPostsByUsernameOrderedByPostedAt(){
+    void shouldGetPostsByUsernameOrderedByPostedAt() {
 
         // Given
         ApplicationUser user = ApplicationUser.builder().username("testuser").build();
 
-        Post post = Post.builder().caption("Post 1").user(user).build();
-        Post post2 = Post.builder().caption("Post 2").user(user).build();
+        Instant now = Instant.now();
+
+        Post post = Post.builder().caption("Post 1").postedAt(now).user(user).build();
+        Post post2 = Post.builder().caption("Post 2").postedAt(now.plusSeconds(1)).user(user).build(); // Add a one-second delay so that it seems posted after.
 
         userRepo.save(user);
         underTest.save(post);
@@ -103,7 +106,7 @@ class PostRepositoryTest {
         List<Post> resultsList = results.toList();
 
         assertEquals(user.getUsername(), resultsList.getFirst().getUser().getUsername());
-        assertEquals(post2.getCaption(), resultsList.getFirst().getCaption()); // Check the first post has the caption of the last created post.
+        assertEquals(post2.getCaption(), resultsList.getFirst().getCaption()); // Check that the ordering worked by making sure the first one in the list is the last posted.
 
     }
 

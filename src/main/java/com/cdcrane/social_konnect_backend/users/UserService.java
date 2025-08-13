@@ -4,7 +4,6 @@ import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
 import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
 import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
-import com.cdcrane.social_konnect_backend.config.email.EmailUseCase;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
@@ -44,6 +43,13 @@ public class UserService implements UserUseCase {
         this.roleRepo = roleRepo;
         this.securityUtils = securityUtils;
         this.eventPublisher = eventPublisher;
+    }
+
+    @Override
+    public boolean checkIfUsernameExists(String username){
+
+        return userRepository.existsByUsername(username);
+
     }
 
     /**
@@ -109,7 +115,7 @@ public class UserService implements UserUseCase {
             int newCode = securityUtils.generateVerificationCode();
 
             user.setVerificationCode(newCode);
-            ApplicationUser newUser = userRepository.save(user);
+            userRepository.save(user);
 
             eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), newCode));
 

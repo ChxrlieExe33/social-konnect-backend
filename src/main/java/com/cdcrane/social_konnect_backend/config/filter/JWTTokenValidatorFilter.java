@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Slf4j
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
@@ -79,7 +78,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
             if (request.getRequestURI().equals(uri)){
                 return true;
             }
-            if (request.getRequestURI().startsWith("/media/")) {
+            if (request.getRequestURI().startsWith("/media/") || request.getRequestURI().startsWith("/api/auth/exists/")) {
                 return true;
             }
         }

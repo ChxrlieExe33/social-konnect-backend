@@ -12,6 +12,7 @@ import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -39,6 +40,23 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
         this.passwordResetUseCase = passwordResetUseCase;
+    }
+
+    @GetMapping("/exists/{username}")
+    public ResponseEntity<Boolean> checkIfUsernameExists(@PathVariable String username){
+
+        boolean exists = userService.checkIfUsernameExists(username);
+
+        if(exists){
+
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(true);
+
+        } else {
+
+            return ResponseEntity.status(HttpStatus.OK).body(false);
+
+        }
+
     }
 
     /**

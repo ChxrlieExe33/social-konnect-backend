@@ -20,4 +20,6 @@ public interface UserUseCase extends UserDetailsService {
     ApplicationUser updateUserName(String oldName, String newName);
 
     void changePassword(String newPassword);
+
+    boolean checkIfUsernameExists(String username);
 }

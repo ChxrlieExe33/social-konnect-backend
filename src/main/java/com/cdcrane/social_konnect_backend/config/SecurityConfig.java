@@ -32,6 +32,7 @@ public class SecurityConfig {
             "/api/auth/resetpassword",
             "/api/auth/resetpassword/verify",
             "/api/auth/resetpassword/submitnew",
+            "/api/auth/exists/**",
             "/media/**"
     };
 
