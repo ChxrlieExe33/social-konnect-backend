@@ -11,7 +11,6 @@ import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.cdcrane.social_konnect_backend.users.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,14 +29,12 @@ public class PostService implements PostUseCase {
     private final PostRepository postRepo;
     private final SecurityUtils securityUtils;
     private final FileHandler fileHandler;
-    private final UserRepository userRepository;
 
     @Autowired
-    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler, UserRepository userRepository) {
+    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
         this.postRepo = postRepo;
         this.securityUtils = securityUtils;
         this.fileHandler = fileHandler;
-        this.userRepository = userRepository;
     }
 
     // -------------------------------- Retrieve data --------------------------------

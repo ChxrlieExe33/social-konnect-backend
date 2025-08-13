@@ -5,9 +5,11 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedEx
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostDTOWithLiked;
+import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
+import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
-import com.cdcrane.social_konnect_backend.users.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +32,7 @@ import static org.mockito.BDDMockito.given;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,12 +49,10 @@ class PostServiceTest {
     @Mock
     private FileHandler fileHandler;
 
-    @Mock
-    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
-        underTest = new PostService(postRepository, securityUtils, fileHandler, userRepository);
+        underTest = new PostService(postRepository, securityUtils, fileHandler);
     }
 
     @Test
@@ -103,6 +104,35 @@ class PostServiceTest {
     }
 
     @Test
+    void shouldGetPostById() {
+
+        // Given
+        Post p1 = Post.builder().caption("Post 1").build();
+
+        given(postRepository.findById(p1.getId())).willReturn(Optional.of(p1));
+
+        // When
+        underTest.getPostById(p1.getId());
+
+        // Then
+        verify(postRepository).findById(p1.getId());
+
+    }
+
+    @Test
+    void shouldNotGetPostById() {
+
+        // Given no post
+        given(postRepository.findById(any())).willReturn(Optional.empty());
+
+        // Then
+        assertThatThrownBy(() -> underTest.getPostById(any())).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(postRepository).findById(any());
+
+    }
+
+    @Test
     void shouldGetPostsByUsername() {
 
         // Given
@@ -141,6 +171,162 @@ class PostServiceTest {
         // Then
         assertThatThrownBy(() -> underTest.getPostsByUsername("testuser", Pageable.unpaged()))
                 .isInstanceOf(ResourceNotFoundException.class);
+
+    }
+
+    @Test
+    void shouldGetPostsWithLiked() {
+
+        // Given
+        ApplicationUser user =  ApplicationUser.builder().username("testuser").profilePictureUrl("http://google.com").id(1L).build();
+        given(securityUtils.getCurrentAuth()).willReturn(user);
+
+        Post p1 =  Post.builder().caption("Post 1").id(UUID.randomUUID()).user(user).build();
+        Post p2 =  Post.builder().caption("Post 2").id(UUID.randomUUID()).user(user).build();
+        Page<Post> posts = new PageImpl<>(List.of(p1, p2));
+        given(postRepository.getPostsOrderByPostedAt(any())).willReturn(posts);
+
+        PostLikeStatusDTO statusP1 = new PostLikeStatusDTO(p1.getId(), true);
+        PostLikeStatusDTO statusP2 = new PostLikeStatusDTO(p2.getId(), true);
+        given(postRepository.findLikeStatusByPostIds(any(), any())).willReturn(List.of(statusP1, statusP2));
+
+        // When
+        Page<PostDTOWithLiked> response = underTest.getPostsWithLiked(Pageable.unpaged());
+
+        // Then
+        verify(postRepository).getPostsOrderByPostedAt(any());
+        verify(postRepository).findLikeStatusByPostIds(List.of(p1.getId(), p2.getId()), user.getId());
+
+        List<PostDTOWithLiked> data = response.stream().toList();
+
+        assertThat(data.size()).isEqualTo(2);
+        assertThat(data.getFirst().liked()).isTrue();
+        assertThat(data.getLast().liked()).isTrue();
+
+    }
+
+    @Test
+    void shouldNotGetPostsWithLikedBecauseNoPosts() {
+
+        // Given no posts
+        given(postRepository.getPostsOrderByPostedAt(any())).willReturn(Page.empty());
+
+        // Then
+        assertThatThrownBy(() -> underTest.getPostsWithLiked(Pageable.unpaged())).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(postRepository, never()).findLikeStatusByPostIds(any(), any());
+
+
+    }
+
+    @Test
+    void shouldGetPostsWithLikedByUsername() {
+
+        // Given
+        ApplicationUser user =  ApplicationUser.builder().username("testuser").profilePictureUrl("http://google.com").id(1L).build();
+
+        Post p1 =  Post.builder().caption("Post 1").id(UUID.randomUUID()).user(user).build();
+        Post p2 =  Post.builder().caption("Post 2").id(UUID.randomUUID()).user(user).build();
+        Page<Post> posts = new PageImpl<>(List.of(p1, p2));
+        given(postRepository.getPostsByUsernameOrderByPostedAt(any(), any())).willReturn(posts);
+
+        given(securityUtils.getCurrentAuth()).willReturn(user);
+
+        PostLikeStatusDTO statusP1 = new PostLikeStatusDTO(p1.getId(), true);
+        PostLikeStatusDTO statusP2 = new PostLikeStatusDTO(p2.getId(), true);
+        given(postRepository.findLikeStatusByPostIds(any(), any())).willReturn(List.of(statusP1, statusP2));
+
+        // When
+        Page<PostDTOWithLiked> response = underTest.getPostsWithLikedByUsername(any(), eq(Pageable.unpaged()));
+
+        // Then
+        verify(postRepository).getPostsByUsernameOrderByPostedAt(any(), any());
+        verify(postRepository).findLikeStatusByPostIds(List.of(p1.getId(), p2.getId()), user.getId());
+
+        List<PostDTOWithLiked> data = response.stream().toList();
+
+        assertThat(data.size()).isEqualTo(2);
+        assertThat(data.getFirst().liked()).isTrue();
+        assertThat(data.getLast().liked()).isTrue();
+
+    }
+
+    @Test
+    void shouldNotGetPostsWithLikedByUsernameBecauseNoPosts() {
+
+        // Given no posts
+        given(postRepository.getPostsByUsernameOrderByPostedAt(any(), any())).willReturn(Page.empty());
+
+        // Then
+        assertThatThrownBy(() -> underTest.getPostsWithLikedByUsername(any(), any())).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(postRepository, never()).findLikeStatusByPostIds(any(), any());
+
+    }
+
+    @Test
+    void shouldGetPostWithLikedById() {
+
+        // Given
+        ApplicationUser user = ApplicationUser.builder().username("testuser").profilePictureUrl("http://google.com").id(1L).build();
+        given(securityUtils.getCurrentAuth()).willReturn(user);
+
+        Post p1 = Post.builder().caption("Post 1").id(UUID.randomUUID()).user(user).build();
+        given(postRepository.findById(p1.getId())).willReturn(Optional.of(p1));
+
+        PostLikeStatusDTO statusP1 = new PostLikeStatusDTO(p1.getId(), true);
+        given(postRepository.findLikeStatusByPostId(p1.getId(), user.getId())).willReturn(statusP1);
+
+        // When
+        PostDTOWithLiked response = underTest.getPostWithLikedById(p1.getId());
+
+        // Then
+        verify(postRepository).findById(p1.getId());
+        verify(postRepository).findLikeStatusByPostId(p1.getId(), user.getId());
+
+        assertThat(response.liked()).isTrue();
+
+    }
+
+    @Test
+    void shouldNotGetPostWithLikedByIdBecauseNoPost() {
+
+        // Given no posts
+        UUID invalidPost =  UUID.randomUUID();
+
+        given(postRepository.findById(invalidPost)).willReturn(Optional.empty());
+
+        // Then
+        assertThatThrownBy(() -> underTest.getPostWithLikedById(invalidPost)).isInstanceOf(ResourceNotFoundException.class);
+
+        verify(postRepository, never()).findLikeStatusByPostId(any(), any());
+
+    }
+
+    @Test
+    void shouldGetPostMetadataByPostId(){
+
+        // Given
+        PostMetadataDTO metadata = new PostMetadataDTO(UUID.randomUUID(), 1L, 2L);
+
+        given(postRepository.getPostMetadataByPostId(metadata.postId())).willReturn(Optional.of(metadata));
+
+        // When
+        underTest.getPostMetadataByPostId(metadata.postId());
+
+        // Then
+        verify(postRepository).getPostMetadataByPostId(metadata.postId());
+
+    }
+
+    @Test
+    void shouldNotGetPostMetadataByPostIdBecauseNoPost() {
+
+        // Given no post
+        given(postRepository.getPostMetadataByPostId(any())).willReturn(Optional.empty());
+
+        // Then
+        assertThatThrownBy(() -> underTest.getPostMetadataByPostId(UUID.randomUUID())).isInstanceOf(ResourceNotFoundException.class);
 
     }
 
