@@ -1,7 +1,9 @@
 package com.cdcrane.social_konnect_backend.posts;
 
+import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.posts.dto.*;
 import com.cdcrane.social_konnect_backend.posts.post_media.dto.PostMediaDTO;
+import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,10 +21,12 @@ import java.util.stream.Collectors;
 public class PostController {
 
     private final PostUseCase postUseCase;
+    private final SecurityUtils securityUtils;
 
     @Autowired
-    public PostController(PostUseCase postUseCase) {
+    public PostController(PostUseCase postUseCase, SecurityUtils securityUtils) {
         this.postUseCase = postUseCase;
+        this.securityUtils = securityUtils;
     }
 
     // -------------------------------- GET mappings --------------------------------
@@ -114,12 +118,14 @@ public class PostController {
 
         Post savedPost = postUseCase.savePost(createPostDTO);
 
+        ApplicationUser auth = securityUtils.getCurrentAuth();
+
         // If just text post, return empty list.
         if(savedPost.getPostMedia() == null){
 
             // Return media as empty list
             return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
-                    List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt(), null));
+                    List.of(), savedPost.getUser().getUsername(), savedPost.getPostedAt(), auth.getProfilePictureUrl()));
 
         }
 
@@ -127,7 +133,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new PostDTO(savedPost.getId(), savedPost.getCaption(),
                 savedPost.getPostMedia().stream()
                         .map(m -> new PostMediaDTO(m.getMediaUrl(), m.getMediaType())).toList(),
-                savedPost.getUser().getUsername(), savedPost.getPostedAt(), null));
+                savedPost.getUser().getUsername(), savedPost.getPostedAt(), auth.getProfilePictureUrl()));
 
     }
 

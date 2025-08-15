@@ -5,7 +5,10 @@ import com.cdcrane.social_konnect_backend.users.dto.ChangePasswordDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UpdateUsernameDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,6 +47,17 @@ public class UserController {
 
     }
 
+    @GetMapping("/search/{username}")
+    public ResponseEntity<Page<UserSummaryDTO>> searchUsers(@PathVariable @NotBlank String username, Pageable pageable){
+
+        Page<ApplicationUser> users = userService.searchUsersByUsername(username, pageable);
+
+        var response = users.map(this::mapToUserSummary);
+
+        return ResponseEntity.ok(response);
+
+    }
+
     @PutMapping("/username")
     public ResponseEntity<UserSummaryDTO> updateUserName(@RequestBody @Valid UpdateUsernameDTO dto){
 
@@ -72,5 +86,12 @@ public class UserController {
 
     }
 
+    // --------------------------------- HELPER METHODS ---------------------------------
+
+    private UserSummaryDTO mapToUserSummary(ApplicationUser user){
+
+        return new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio(), user.getProfilePictureUrl());
+
+    }
 
 }

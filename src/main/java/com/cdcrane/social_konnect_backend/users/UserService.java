@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -126,6 +128,20 @@ public class UserService implements UserUseCase {
         user.setEnabled(true);
         return userRepository.save(user);
 
+    }
+
+    @Override
+    public Page<ApplicationUser> searchUsersByUsername(String username, Pageable pageable){
+
+        Page<ApplicationUser> users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
+
+        if(users.isEmpty()){
+
+            throw new UserNotFoundException("No users were found");
+
+        }
+
+        return users;
     }
 
 

@@ -45,7 +45,7 @@ public class LocalFileHandler implements FileHandler {
             Map<String, String> fileInfo = storeFile(file);
 
             // TODO: Change this hardcoded URL to be created dynamically.
-            String fileUrl = "http://localhost:8080/media" + fileInfo.get("filename");
+            String fileUrl = "http://localhost:8080/media/" + fileInfo.get("filename");
 
 
             media.add(PostMedia.builder()
