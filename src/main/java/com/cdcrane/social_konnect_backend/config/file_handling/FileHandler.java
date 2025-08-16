@@ -11,4 +11,6 @@ public interface FileHandler {
 
     void deleteFile(String fileName);
 
+    String saveNewProfilePicture(MultipartFile file);
+
 }

@@ -144,4 +144,50 @@ public class LocalFileHandler implements FileHandler {
 
         }
     }
+
+    @Override
+    public String saveNewProfilePicture(MultipartFile file) {
+
+        try {
+
+            String originalName = file.getOriginalFilename();
+
+            if (originalName == null) {
+                originalName = "profile_picture";
+            }
+
+            // For checking and validating file type, much more accurate than the native support.
+            Tika tika = new Tika();
+            String mimeType = tika.detect(file.getInputStream());
+            String actualType;
+
+            if (!FileHandlerConstants.ALLOWED_IMAGE_TYPES.contains(mimeType)) {
+
+                throw new FileTypeNotValidException("File type not supported: " + mimeType + " for file: " + originalName + " .");
+
+            }
+
+            // Remove all spaces from original name
+            originalName = originalName.replace(" ", "");
+
+            // Generate unique name even if files with same name are uploaded twice.
+            String fileName = System.currentTimeMillis() + "_profile_picture_" + originalName;
+
+            // TODO: Create path to share static resources found in this directory.
+            Path upload = Paths.get("uploads/", fileName);
+
+            // Create dir if it doesn't exist
+            Files.createDirectories(upload.getParent());
+
+            Files.copy(file.getInputStream(), upload, StandardCopyOption.REPLACE_EXISTING);
+
+            // TODO: Change this hardcoded URL to be created dynamically.
+            return "http://localhost:8080/media/" + fileName;
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }

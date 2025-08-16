@@ -6,10 +6,12 @@ import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerifi
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
+import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
+import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
 import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
@@ -37,14 +39,16 @@ public class UserService implements UserUseCase {
     private final RoleRepository roleRepo;
     private final SecurityUtils securityUtils;
     private final ApplicationEventPublisher eventPublisher;
+    private final FileHandler fileHandler;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher) {
+    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher, FileHandler fileHandler) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.roleRepo = roleRepo;
         this.securityUtils = securityUtils;
         this.eventPublisher = eventPublisher;
+        this.fileHandler = fileHandler;
     }
 
     @Override
@@ -216,6 +220,29 @@ public class UserService implements UserUseCase {
         }
 
         return users;
+
+    }
+
+    @Override
+    public ApplicationUser changeProfileData(ChangeBioAndPfpDTO dto){
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        if(dto.pfp() != null) {
+
+            String pfpUrl = fileHandler.saveNewProfilePicture(dto.pfp());
+
+            user.setProfilePictureUrl(pfpUrl);
+            user.setBio(dto.bio());
+
+            return userRepository.save(user);
+
+        } else {
+
+            user.setBio(dto.bio());
+
+            return userRepository.save(user);
+        }
 
     }
 

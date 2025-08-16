@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
+import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
 import com.cdcrane.social_konnect_backend.users.dto.ChangePasswordDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UpdateUsernameDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
@@ -23,12 +24,12 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final UserService userService;
+    private final UserUseCase userUseCase;
     private final JWTUtil jWTUtil;
 
     @Autowired
     public UserController(UserService userService, JWTUtil jWTUtil) {
-        this.userService = userService;
+        this.userUseCase = userService;
         this.jWTUtil = jWTUtil;
     }
 
@@ -37,7 +38,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserSummaryDTO>> getAllUsers(){
 
-        var users = userService.getAllUsers();
+        var users = userUseCase.getAllUsers();
 
         List<UserSummaryDTO> userSummaries = users.stream()
                 .map(user -> new UserSummaryDTO(user.getId(), user.getUsername(), user.getEmail(), user.getBio(), user.getProfilePictureUrl()))
@@ -50,7 +51,7 @@ public class UserController {
     @GetMapping("/search/{username}")
     public ResponseEntity<Page<UserSummaryDTO>> searchUsers(@PathVariable @NotBlank String username, Pageable pageable){
 
-        Page<ApplicationUser> users = userService.searchUsersByUsername(username, pageable);
+        Page<ApplicationUser> users = userUseCase.searchUsersByUsername(username, pageable);
 
         var response = users.map(this::mapToUserSummary);
 
@@ -58,10 +59,29 @@ public class UserController {
 
     }
 
+    @GetMapping("/{username}")
+    public ResponseEntity<UserSummaryDTO> getUserByUsername(@PathVariable @NotBlank String username){
+
+        ApplicationUser user = userUseCase.getUserByUsernameOnlyUserSummary(username);
+
+        return ResponseEntity.ok(mapToUserSummary(user));
+
+    }
+
+    @PutMapping
+    public ResponseEntity<UserSummaryDTO> updateUserProfile(@ModelAttribute ChangeBioAndPfpDTO dto){
+
+        ApplicationUser updated = userUseCase.changeProfileData(dto);
+
+        return ResponseEntity.ok(mapToUserSummary(updated));
+
+    }
+
+
     @PutMapping("/username")
     public ResponseEntity<UserSummaryDTO> updateUserName(@RequestBody @Valid UpdateUsernameDTO dto){
 
-        ApplicationUser updated = userService.updateUserName(dto.oldName(), dto.newName());
+        ApplicationUser updated = userUseCase.updateUserName(dto.oldName(), dto.newName());
 
         var response = new UserSummaryDTO(updated.getId(), updated.getUsername(), updated.getEmail(), updated.getBio(), updated.getProfilePictureUrl());
 
@@ -80,7 +100,7 @@ public class UserController {
     @PutMapping("/password")
     public ResponseEntity<Void> updateUserPassword(@RequestBody ChangePasswordDTO changePasswordDTO){
 
-        userService.changePassword(changePasswordDTO.newPassword());
+        userUseCase.changePassword(changePasswordDTO.newPassword());
 
         return ResponseEntity.ok().build();
 
