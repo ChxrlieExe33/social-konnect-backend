@@ -1,10 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
-import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
-import com.cdcrane.social_konnect_backend.users.dto.ChangePasswordDTO;
-import com.cdcrane.social_konnect_backend.users.dto.UpdateUsernameDTO;
-import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
+import com.cdcrane.social_konnect_backend.users.dto.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +62,24 @@ public class UserController {
         ApplicationUser user = userUseCase.getUserByUsernameOnlyUserSummary(username);
 
         return ResponseEntity.ok(mapToUserSummary(user));
+
+    }
+
+    @GetMapping("/metadata/{username}")
+    public ResponseEntity<UserMetadataDTO> getUserMetadataByUsername(@PathVariable @NotBlank String username){
+
+        UserMetadataDTO metadata = userUseCase.getUserMetadataByUsername(username);
+
+        return ResponseEntity.ok(metadata);
+
+    }
+
+    @GetMapping("/metadata/me")
+    public ResponseEntity<UserMetadataDTO> getCurrentUserMetadataByUsername(){
+
+        UserMetadataDTO metadata = userUseCase.getCurrentUserMetadataByUsername();
+
+        return ResponseEntity.ok(metadata);
 
     }
 

@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
 import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
+import com.cdcrane.social_konnect_backend.users.dto.UserMetadataDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +22,10 @@ public interface UserUseCase extends UserDetailsService {
     ApplicationUser checkVerificationCode(String username, int verificationCode);
 
     ApplicationUser updateUserName(String oldName, String newName);
+
+    UserMetadataDTO getUserMetadataByUsername(String username);
+
+    UserMetadataDTO getCurrentUserMetadataByUsername();
 
     void changePassword(String newPassword);
 

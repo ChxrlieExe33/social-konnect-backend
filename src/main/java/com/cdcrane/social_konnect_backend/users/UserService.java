@@ -8,10 +8,13 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedEx
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
+import com.cdcrane.social_konnect_backend.follows.FollowUseCase;
+import com.cdcrane.social_konnect_backend.posts.PostUseCase;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
+import com.cdcrane.social_konnect_backend.users.dto.UserMetadataDTO;
 import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
@@ -40,15 +43,19 @@ public class UserService implements UserUseCase {
     private final SecurityUtils securityUtils;
     private final ApplicationEventPublisher eventPublisher;
     private final FileHandler fileHandler;
+    private final PostUseCase postUseCase;
+    private final FollowUseCase followUseCase;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher, FileHandler fileHandler) {
+    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher, FileHandler fileHandler, PostUseCase postUseCase, FollowUseCase followUseCase) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.roleRepo = roleRepo;
         this.securityUtils = securityUtils;
         this.eventPublisher = eventPublisher;
         this.fileHandler = fileHandler;
+        this.postUseCase = postUseCase;
+        this.followUseCase = followUseCase;
     }
 
     @Override
@@ -148,6 +155,35 @@ public class UserService implements UserUseCase {
         return users;
     }
 
+    @Override
+    public UserMetadataDTO getUserMetadataByUsername(String username) {
+
+        ApplicationUser currentUser = securityUtils.getCurrentAuth();
+
+        ApplicationUser targetUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found"));
+
+        int postCount = postUseCase.getPostCountByUserId(targetUser.getId());
+        int followerCount = followUseCase.getFollowerCountByUserId(targetUser.getId());
+        int followingCount = followUseCase.getFollowingCountByUserId(targetUser.getId());
+        boolean currentUserFollowsTarget = followUseCase.existsByFollowerAndFollowed(currentUser.getId(), targetUser.getId());
+
+        return new UserMetadataDTO(followerCount, followingCount, postCount, currentUserFollowsTarget);
+
+    }
+
+    @Override
+    public UserMetadataDTO getCurrentUserMetadataByUsername() {
+
+        ApplicationUser currentUser = securityUtils.getCurrentAuth();
+
+        int postCount = postUseCase.getPostCountByUserId(currentUser.getId());
+        int followerCount = followUseCase.getFollowerCountByUserId(currentUser.getId());
+        int followingCount = followUseCase.getFollowingCountByUserId(currentUser.getId());
+
+        return new UserMetadataDTO(followerCount, followingCount, postCount, null);
+
+    }
 
     /**
      * Method implemented from UserDetailsService from Spring Security for getting a User for authentication/authorization.

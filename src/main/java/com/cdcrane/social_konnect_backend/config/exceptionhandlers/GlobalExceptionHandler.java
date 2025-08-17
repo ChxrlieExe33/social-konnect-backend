@@ -8,6 +8,7 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundExce
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.responses.ExceptionErrorResponse;
 import com.cdcrane.social_konnect_backend.config.responses.ValidationErrorResponse;
+import com.cdcrane.social_konnect_backend.follows.CannotFollowException;
 import com.cdcrane.social_konnect_backend.likes.exceptions.UnableToLikeException;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
@@ -269,6 +270,17 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(CannotFollowException.class)
+    public ResponseEntity<ExceptionErrorResponse> handleCannotFollowException(CannotFollowException ex) {
+        ExceptionErrorResponse error = ExceptionErrorResponse.builder()
+                .message(ex.getMessage())
+                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .timestamp(System.currentTimeMillis())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
 }

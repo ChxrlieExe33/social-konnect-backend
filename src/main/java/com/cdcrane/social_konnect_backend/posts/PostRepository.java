@@ -22,6 +22,8 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("SELECT p FROM Post p WHERE p.user.username = ?1 ORDER BY p.postedAt DESC")
     Page<Post> getPostsByUsernameOrderByPostedAt(String username, Pageable pageable);
 
+    int countByUserId(long userId);
+
     @Query("""
         SELECT new com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO(
             p.id,

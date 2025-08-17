@@ -1,5 +1,6 @@
 package com.cdcrane.social_konnect_backend.users;
 
+import com.cdcrane.social_konnect_backend.follows.Follow;
 import com.cdcrane.social_konnect_backend.posts.Post;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,7 +10,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -54,7 +54,13 @@ public class ApplicationUser {
     @JsonIgnoreProperties("user")
     private List<Post> posts;
 
-    @Column(name = "verification_code", nullable = true)
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.REMOVE)
+    private List<Follow> followers;
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE)
+    private List<Follow> following;
+
+    @Column(name = "verification_code")
     private Integer verificationCode; // Must be Integer not int, since it can be null, int cannot contain null, if you try read from db to user, it will cause problem.
 
 }

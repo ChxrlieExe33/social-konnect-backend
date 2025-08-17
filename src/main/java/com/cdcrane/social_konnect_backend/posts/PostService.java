@@ -192,6 +192,13 @@ public class PostService implements PostUseCase {
 
     }
 
+    @Override
+    public int getPostCountByUserId(long userId) {
+
+        return postRepo.countByUserId(userId);
+
+    }
+
     // -------------------------------- Create data --------------------------------
 
     /**

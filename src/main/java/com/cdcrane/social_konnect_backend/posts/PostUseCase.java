@@ -24,6 +24,8 @@ public interface PostUseCase {
 
     PostMetadataDTO getPostMetadataByPostId(UUID postId);
 
+    int getPostCountByUserId(long userId);
+
     Post savePost(CreatePostDTO createPostDTO);
 
     void deletePost(UUID postId);
