@@ -145,6 +145,12 @@
             <version>1.6.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
     </dependencies>
 
 

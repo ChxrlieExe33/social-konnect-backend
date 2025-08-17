@@ -88,10 +88,11 @@ class PostRepositoryTest {
         // Given
         ApplicationUser user = ApplicationUser.builder().username("testuser").build();
 
-        Instant now = Instant.now();
+        Instant earlierTime = Instant.parse("2024-01-01T10:00:00Z");
+        Instant laterTime = Instant.parse("2024-01-01T11:00:00Z");
 
-        Post post = Post.builder().caption("Post 1").postedAt(now).user(user).build();
-        Post post2 = Post.builder().caption("Post 2").postedAt(now.plusSeconds(1)).user(user).build(); // Add a one-second delay so that it seems posted after.
+        Post post = Post.builder().caption("Post 1").postedAt(earlierTime).user(user).build();
+        Post post2 = Post.builder().caption("Post 2").postedAt(laterTime).user(user).build(); // Add a one-second delay so that it seems posted after.
 
         userRepo.save(user);
         underTest.save(post);

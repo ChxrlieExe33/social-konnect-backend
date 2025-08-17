@@ -4,6 +4,7 @@ import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
 import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
+import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
@@ -45,12 +46,15 @@ class UserServiceTest {
     @Mock
     ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    FileHandler fileHandler;
+
     private UserService underTest;
 
     @BeforeEach
     void setUp(){
 
-        underTest = new UserService(userRepository, new BCryptPasswordEncoder(), roleRepository, securityUtils, eventPublisher);
+        underTest = new UserService(userRepository, new BCryptPasswordEncoder(), roleRepository, securityUtils, eventPublisher, fileHandler);
 
     }
 
