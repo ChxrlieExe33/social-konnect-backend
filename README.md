@@ -37,7 +37,7 @@ git clone https://github.com/ChxrlieExe33/social_konnect_backend.git
 
 Then enter the project:
 ```cmd
-cd social_konnect_backend
+cd social-konnect-backend
 ```
 
 After that, you need to **create a .env file**, you can use .env.example in the root as a template, just change out the values to whatever you need.
@@ -53,3 +53,21 @@ Then finally **run it with maven**, this will install the necessary dependencies
 ```
 
 Alternatively, you could **import the project** in your IDE of choice and make sure the JDK is set correctly, then run normally.
+
+## Run it as a docker container
+
+If you simply want to use the application without installing Java, you can run it as a docker container
+
+First build it:
+
+```cmd
+docker build . -t social-konnect-backend
+```
+
+Then you can run the image as a container, don't forget to add the environment variables which are in the .env.example, like so:
+
+```cmd
+docker run -p 8080:8080 social-konnect-backend -e DATABASE_URL=jdbc:postgresql://localhost:5432/your_database -e DATABASE_USER=your_username etc.
+```
+
+You could even add it to the dev docker compose file as another service and set the database host env variable to "postgres".
