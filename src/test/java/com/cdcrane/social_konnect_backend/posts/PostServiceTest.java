@@ -162,6 +162,19 @@ class PostServiceTest {
     }
 
     @Test
+    void shouldGetPostCountByUserId() {
+
+        // Given
+        given(postRepository.countByUserId(1L)).willReturn(1);
+
+        // When
+        int result =  underTest.getPostCountByUserId(1L);
+
+        // Then
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
     void shouldNotGetPostsByUsername(){
 
         // Given no posts

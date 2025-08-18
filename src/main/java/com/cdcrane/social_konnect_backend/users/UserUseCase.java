@@ -21,7 +21,7 @@ public interface UserUseCase extends UserDetailsService {
 
     ApplicationUser checkVerificationCode(String username, int verificationCode);
 
-    ApplicationUser updateUserName(String oldName, String newName);
+    ApplicationUser updateUserName(String newName);
 
     UserMetadataDTO getUserMetadataByUsername(String username);
 

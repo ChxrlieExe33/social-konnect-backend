@@ -290,23 +290,13 @@ public class UserService implements UserUseCase {
      */
     @Override
     @Transactional
-    public ApplicationUser updateUserName(String oldName, String newName) {
-
-        ApplicationUser userToBeUpdated = userRepository.findByUsernameWithRoles(oldName)
-                .orElseThrow(() -> new UserNotFoundException("User with username " + oldName + " not found"));
-
+    public ApplicationUser updateUserName(String newName) {
 
         ApplicationUser auth = securityUtils.getCurrentAuth();
 
-        if(auth.getId() != userToBeUpdated.getId()){
+        auth.setUsername(newName);
 
-            throw new ActionNotPermittedException("User " + auth.getUsername() + " is not allowed to update user " + oldName + " as they are not the same user.");
-
-        }
-
-        userToBeUpdated.setUsername(newName);
-
-        return userRepository.save(userToBeUpdated);
+        return userRepository.save(auth);
 
     }
 

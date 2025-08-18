@@ -96,7 +96,7 @@ public class UserController {
     @PutMapping("/username")
     public ResponseEntity<UserSummaryDTO> updateUserName(@RequestBody @Valid UpdateUsernameDTO dto){
 
-        ApplicationUser updated = userUseCase.updateUserName(dto.oldName(), dto.newName());
+        ApplicationUser updated = userUseCase.updateUserName(dto.newName());
 
         var response = new UserSummaryDTO(updated.getId(), updated.getUsername(), updated.getEmail(), updated.getBio(), updated.getProfilePictureUrl());
 
