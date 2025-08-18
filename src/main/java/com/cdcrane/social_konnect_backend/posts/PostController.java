@@ -7,6 +7,7 @@ import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,7 +41,7 @@ public class PostController {
 
 
     @GetMapping
-    public ResponseEntity<Page<PostDTO>> getAllPosts(Pageable pageable){
+    public ResponseEntity<Page<PostDTO>> getAllPosts(@PageableDefault(size = 10) Pageable pageable){
 
         Page<Post> posts = postUseCase.getAllPosts(pageable);
 
@@ -71,7 +72,7 @@ public class PostController {
     }
 
     @GetMapping("/all-with-liked-check")
-    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLiked(Pageable pageable){
+    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLiked(@PageableDefault(size = 10) Pageable pageable){
 
         Page<PostDTOWithLiked> posts = postUseCase.getPostsWithLiked(pageable);
 
@@ -80,7 +81,7 @@ public class PostController {
     }
 
     @GetMapping("/by-username-with-liked-check/{username}")
-    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLikedByUsername(@PathVariable String username, Pageable pageable){
+    public ResponseEntity<Page<PostDTOWithLiked>> getPostsWithLikedByUsername(@PathVariable String username, @PageableDefault(size = 10) Pageable pageable){
 
         Page<PostDTOWithLiked> posts = postUseCase.getPostsWithLikedByUsername(username, pageable);
 
