@@ -27,6 +27,8 @@ public interface UserUseCase extends UserDetailsService {
 
     UserMetadataDTO getCurrentUserMetadataByUsername();
 
+    String getProfilePictureUrlByUsername(String username);
+
     void changePassword(String newPassword);
 
     boolean checkIfUsernameExists(String username);

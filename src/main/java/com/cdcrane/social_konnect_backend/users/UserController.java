@@ -83,6 +83,15 @@ public class UserController {
 
     }
 
+    @GetMapping("/pfp/{username}")
+    public ResponseEntity<UsernameAndPfpDTO> getProfilePictureByUsername(@PathVariable @NotBlank String username){
+
+        String url = userUseCase.getProfilePictureUrlByUsername(username);
+
+        return ResponseEntity.ok(new UsernameAndPfpDTO(username, url));
+
+    }
+
     @PutMapping
     public ResponseEntity<UserSummaryDTO> updateUserProfile(@ModelAttribute ChangeBioAndPfpDTO dto){
 

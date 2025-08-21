@@ -5,6 +5,7 @@ import com.cdcrane.social_konnect_backend.authentication.events.VerificationCode
 import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
+import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
@@ -260,6 +261,19 @@ public class UserService implements UserUseCase {
     }
 
     @Override
+    public String getProfilePictureUrlByUsername(String username) {
+
+        String url = userRepository.getProfilePictureUrlByUsername(username);
+
+        if (url == null) {
+            throw new ResourceNotFoundException("Profile picture for user with username " + username + " not found, cannot get profile picture url.");
+        }
+
+        return url;
+
+    }
+
+    @Override
     public ApplicationUser changeProfileData(ChangeBioAndPfpDTO dto){
 
         ApplicationUser user = securityUtils.getCurrentAuth();
@@ -284,7 +298,6 @@ public class UserService implements UserUseCase {
 
     /**
      * Update the username of an existing User only if the currently authenticated user is the same user.
-     * @param oldName The name of the existing User.
      * @param newName The new name to assign to the User.
      * @return An updated ApplicationUser object.
      */
