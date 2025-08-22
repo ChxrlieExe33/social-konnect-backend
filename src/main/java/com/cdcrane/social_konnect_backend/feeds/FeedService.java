@@ -3,10 +3,18 @@ package com.cdcrane.social_konnect_backend.feeds;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
 import com.cdcrane.social_konnect_backend.posts.Post;
+import com.cdcrane.social_konnect_backend.posts.PostRepository;
+import com.cdcrane.social_konnect_backend.posts.dto.PostDTOWithLiked;
+import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -14,13 +22,15 @@ public class FeedService implements FeedUseCase{
 
     private final SecurityUtils securityUtils;
     private final FollowingFeedRepository followingFeedRepository;
+    private final PostRepository postRepository;
 
-    public FeedService(SecurityUtils securityUtils, FollowingFeedRepository followingFeedRepository) {
+    public FeedService(SecurityUtils securityUtils, FollowingFeedRepository followingFeedRepository, PostRepository postRepository) {
         this.securityUtils = securityUtils;
         this.followingFeedRepository = followingFeedRepository;
+        this.postRepository = postRepository;
     }
 
-    public Page<Post> getCurrentUserFollowingFeedMostRecent(Pageable pageable) {
+    public Page<PostDTOWithLiked> getCurrentUserFollowingFeedMostRecent(Pageable pageable) {
 
         ApplicationUser me = securityUtils.getCurrentAuth();
 
@@ -30,7 +40,24 @@ public class FeedService implements FeedUseCase{
             throw new ResourceNotFoundException("No posts found from users you are following.");
         }
 
-        return followingPosts;
+        // Extract IDs
+        List<UUID> postIds = followingPosts.getContent().stream()
+                .map(Post::getId)
+                .toList();
+
+        // Get like status of these posts
+        List<PostLikeStatusDTO> likeStatuses = postRepository.findLikeStatusByPostIds(postIds, me.getId());
+
+        Map<UUID, Boolean> likeStatusMap = likeStatuses.stream()
+                .collect(Collectors.toMap(
+                        PostLikeStatusDTO::postId,
+                        PostLikeStatusDTO::liked
+                ));
+
+        return followingPosts.map(post -> {
+            boolean liked = likeStatusMap.getOrDefault(post.getId(), false);
+            return new PostDTOWithLiked(post, liked);
+        });
 
     }
 }
