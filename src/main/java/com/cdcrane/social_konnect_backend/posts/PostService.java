@@ -9,10 +9,12 @@ import com.cdcrane.social_konnect_backend.posts.dto.CreatePostDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostDTOWithLiked;
 import com.cdcrane.social_konnect_backend.posts.dto.PostLikeStatusDTO;
 import com.cdcrane.social_konnect_backend.posts.dto.PostMetadataDTO;
+import com.cdcrane.social_konnect_backend.posts.events.PostCreatedEvent;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,12 +31,14 @@ public class PostService implements PostUseCase {
     private final PostRepository postRepo;
     private final SecurityUtils securityUtils;
     private final FileHandler fileHandler;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
-    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler) {
+    public PostService(PostRepository postRepo, SecurityUtils securityUtils, FileHandler fileHandler, ApplicationEventPublisher applicationEventPublisher) {
         this.postRepo = postRepo;
         this.securityUtils = securityUtils;
         this.fileHandler = fileHandler;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     // -------------------------------- Retrieve data --------------------------------
@@ -60,10 +64,8 @@ public class PostService implements PostUseCase {
     @Override
     public Post getPostById(UUID postId) {
 
-        Post post = postRepo.findById(postId)
+        return postRepo.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post with id " + postId + " not found."));
-
-        return post;
 
     }
 
@@ -238,7 +240,11 @@ public class PostService implements PostUseCase {
 
         post.setCaption(cleanCaption);
 
-        return postRepo.save(post);
+        Post savedPost = postRepo.save(post);
+
+        applicationEventPublisher.publishEvent(new PostCreatedEvent(savedPost, user));
+
+        return savedPost;
 
     }
 
