@@ -30,6 +30,11 @@ public class LikeService implements LikeUseCase {
     }
 
 
+    /**
+     * Add a like to a post as the currently authenticated user.
+     * @param postId The ID of the post to add the like to.
+     * @return The Like object after creation.
+     */
     @Override
     public Like likePost(UUID postId) {
 
@@ -53,6 +58,10 @@ public class LikeService implements LikeUseCase {
 
     }
 
+    /**
+     * Remove a like if it exists from the indicated post as the currently authenticated user.
+     * @param postId The post-ID to remove the like from.
+     */
     @Override
     public void unlikePost(UUID postId) {
 
@@ -65,6 +74,11 @@ public class LikeService implements LikeUseCase {
 
     }
 
+    /**
+     * Get the number of likes of a specific post.
+     * @param postId The ID of the post in question.
+     * @return The number of likes.
+     */
     @Override
     public int getLikeCountByPostId(UUID postId) {
 
@@ -75,6 +89,12 @@ public class LikeService implements LikeUseCase {
 
     }
 
+    /**
+     * Get a page of usernames who have liked a specific post.
+     * @param postId The ID of the post in question.
+     * @param pageable Pagination data from the query params.
+     * @return The Page of users who have liked the post.
+     */
     @Override
     public Page<String> getUsernamesWhoLikePost(UUID postId, Pageable pageable) {
 

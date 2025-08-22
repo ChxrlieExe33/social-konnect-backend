@@ -180,6 +180,11 @@ public class PostService implements PostUseCase {
 
     }
 
+    /**
+     * Get a specific post by ID, including if the current user has liked it or not.
+     * @param postId The post ID to search by.
+     * @return The Post DTO.
+     */
     @Override
     public PostDTOWithLiked getPostWithLikedById(UUID postId) {
 

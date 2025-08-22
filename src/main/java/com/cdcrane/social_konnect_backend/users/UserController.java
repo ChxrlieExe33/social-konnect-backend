@@ -77,7 +77,7 @@ public class UserController {
     @GetMapping("/metadata/me")
     public ResponseEntity<UserMetadataDTO> getCurrentUserMetadataByUsername(){
 
-        UserMetadataDTO metadata = userUseCase.getCurrentUserMetadataByUsername();
+        UserMetadataDTO metadata = userUseCase.getCurrentUserMetadata();
 
         return ResponseEntity.ok(metadata);
 

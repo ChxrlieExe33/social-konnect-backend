@@ -30,6 +30,11 @@ public class FeedService implements FeedUseCase{
         this.postRepository = postRepository;
     }
 
+    /**
+     * Get the following feed for the current user.
+     * @param pageable Pagination data from the query params.
+     * @return A page of objects with Post information and if the current user has liked the post.
+     */
     public Page<PostDTOWithLiked> getCurrentUserFollowingFeedMostRecent(Pageable pageable) {
 
         ApplicationUser me = securityUtils.getCurrentAuth();

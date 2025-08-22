@@ -36,6 +36,12 @@ public class FollowService implements FollowUseCase {
 
     }
 
+    /**
+     * For checking if a specific user has followed another user.
+     * @param followerId The person who is following.
+     * @param followedId The person who is being followed.
+     * @return The status of if the "follower" is actually following the "followed".
+     */
     @Override
     public boolean existsByFollowerAndFollowed(long followerId, long followedId) {
 
@@ -43,6 +49,10 @@ public class FollowService implements FollowUseCase {
 
     }
 
+    /**
+     * Follow a user as the current authenticated user.
+     * @param username The username to follow.
+     */
     @Override
     @Transactional
     public void followUser(String username) {
@@ -65,6 +75,10 @@ public class FollowService implements FollowUseCase {
 
     }
 
+    /**
+     * Unfollow a user as the current authenticated user, if there is an existing follow.
+     * @param username The username to unfollow.
+     */
     @Override
     @Transactional
     public void unfollowUser(String username) {

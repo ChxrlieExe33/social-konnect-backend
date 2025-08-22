@@ -83,6 +83,11 @@ public class CommentService implements CommentUseCase {
         commentRepository.delete(comment);
     }
 
+    /**
+     * Get the count of comments of a specific post.
+     * @param postId The ID of the post in question.
+     * @return The number of comments.
+     */
     @Override
     public int getCommentCountByPostId(UUID postId) {
 
@@ -93,6 +98,12 @@ public class CommentService implements CommentUseCase {
 
     }
 
+    /**
+     * Get a page of comments from a specific post.
+     * @param postId The ID of the post in question.
+     * @param pageable The pagination data from the query params.
+     * @return The page of comments of that post.
+     */
     @Override
     public Page<Comment> getCommentsByPostId(UUID postId, Pageable pageable) {
 

@@ -142,6 +142,12 @@ public class UserService implements UserUseCase {
 
     }
 
+    /**
+     * Get a page of users, searching by a username.
+     * @param username The username to search by.
+     * @param pageable The pagination data from the query params.
+     * @return The page of users.
+     */
     @Override
     public Page<ApplicationUser> searchUsersByUsername(String username, Pageable pageable){
 
@@ -156,6 +162,11 @@ public class UserService implements UserUseCase {
         return users;
     }
 
+    /**
+     * Get the metadata of a user profile, including the post-count, follower count, the following count and if the current user follows the target user.
+     * @param username The username of the target profile.
+     * @return The metadata of the user profile.
+     */
     @Override
     public UserMetadataDTO getUserMetadataByUsername(String username) {
 
@@ -173,8 +184,12 @@ public class UserService implements UserUseCase {
 
     }
 
+    /**
+     * Get the metadata of the current user profile, including the post-count, follower count and the following count.
+     * @return The metadata of the current user.
+     */
     @Override
-    public UserMetadataDTO getCurrentUserMetadataByUsername() {
+    public UserMetadataDTO getCurrentUserMetadata() {
 
         ApplicationUser currentUser = securityUtils.getCurrentAuth();
 
@@ -260,6 +275,11 @@ public class UserService implements UserUseCase {
 
     }
 
+    /**
+     * Get the profile picture of the username indicated.
+     * @param username The username to get the profile picture of.
+     * @return The profile picture URL.
+     */
     @Override
     public String getProfilePictureUrlByUsername(String username) {
 
@@ -273,6 +293,11 @@ public class UserService implements UserUseCase {
 
     }
 
+    /**
+     * Change basic profile data including the BIO and profile picture.
+     * @param dto The DTO with the updated data.
+     * @return The updated user object.
+     */
     @Override
     public ApplicationUser changeProfileData(ChangeBioAndPfpDTO dto){
 

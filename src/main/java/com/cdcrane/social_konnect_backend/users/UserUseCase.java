@@ -25,7 +25,7 @@ public interface UserUseCase extends UserDetailsService {
 
     UserMetadataDTO getUserMetadataByUsername(String username);
 
-    UserMetadataDTO getCurrentUserMetadataByUsername();
+    UserMetadataDTO getCurrentUserMetadata();
 
     String getProfilePictureUrlByUsername(String username);
 

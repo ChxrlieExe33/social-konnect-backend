@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -255,7 +254,7 @@ class UserServiceTest {
         given(followUseCase.getFollowingCountByUserId(1L)).willReturn(3);
 
         // When
-        UserMetadataDTO data = underTest.getCurrentUserMetadataByUsername();
+        UserMetadataDTO data = underTest.getCurrentUserMetadata();
 
         // Then
         assertThat(data.postsCount()).isEqualTo(1);
