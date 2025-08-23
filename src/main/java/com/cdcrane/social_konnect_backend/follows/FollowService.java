@@ -61,6 +61,10 @@ public class FollowService implements FollowUseCase {
         ApplicationUser targetUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found. Cannot follow user."));
 
+        if (targetUser.getId() == currentUser.getId()) {
+            throw new CannotFollowException("You cannot follow yourself.");
+        }
+
         if (followRepository.existsByFollowerIdAndFollowedId(currentUser.getId(), targetUser.getId())) {
 
             throw new CannotFollowException("Cannot follow user " + username + " as you already follow them.");
