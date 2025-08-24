@@ -339,14 +339,20 @@ public class UserService implements UserUseCase {
     }
 
     /**
-     * Change the password of the currently authenticated user, does not require email verification as the user is actually logged in.
-     * @param newPassword
+     * Update the password of the currently authenticated user, does not require email verification as the user is actually logged in.
+     * @param oldPassword The previous password
+     * @param newPassword The new password.
      */
     @Override
     @Transactional
-    public void changePassword(String newPassword) {
+    public void changePassword(String oldPassword ,String newPassword) {
 
         ApplicationUser user = securityUtils.getCurrentAuth();
+
+        if(!encoder.matches(oldPassword, user.getPassword())){
+
+            throw new UnableToChangePasswordException("Old password is incorrect.");
+        }
 
         if(encoder.matches(newPassword, user.getPassword())){
 

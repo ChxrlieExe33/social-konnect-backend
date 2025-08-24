@@ -29,7 +29,7 @@ public interface UserUseCase extends UserDetailsService {
 
     String getProfilePictureUrlByUsername(String username);
 
-    void changePassword(String newPassword);
+    void changePassword(String oldPassword, String newPassword);
 
     boolean checkIfUsernameExists(String username);
 

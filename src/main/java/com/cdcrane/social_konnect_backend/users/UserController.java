@@ -124,7 +124,7 @@ public class UserController {
     @PutMapping("/password")
     public ResponseEntity<Void> updateUserPassword(@RequestBody ChangePasswordDTO changePasswordDTO){
 
-        userUseCase.changePassword(changePasswordDTO.newPassword());
+        userUseCase.changePassword(changePasswordDTO.oldPassword() ,changePasswordDTO.newPassword());
 
         return ResponseEntity.ok().build();
 

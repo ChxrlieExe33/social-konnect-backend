@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.posts;
 
 import com.cdcrane.social_konnect_backend.comments.Comment;
+import com.cdcrane.social_konnect_backend.feeds.FollowingFeedItem;
 import com.cdcrane.social_konnect_backend.likes.Like;
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
@@ -11,7 +12,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,25 +53,10 @@ public class Post {
     @JoinColumn(name = "post_id")
     private List<Like> likes;
 
-    public void addComment(Comment comment){
-
-        if (this.comments == null){
-            this.comments = new LinkedList<>();
-        }
-
-        this.comments.add(comment);
-
-    }
-
-    public void addLike(Like like){
-
-        if (this.likes == null){
-            this.likes = new LinkedList<>();
-        }
-
-        this.likes.add(like);
-
-    }
+    // The instances where this post is referenced in a following feed item. Need this for the cascade delete.
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private List<FollowingFeedItem> followingFeedInstances;
 
 
 }

@@ -29,12 +29,12 @@ public class FeedGenerationEventListener {
     }
 
     /**
-     * Handles the creation of Following feed items by retrieving the list of the users followers
+     * Handles the creation of Following feed items by retrieving the list of the user's followers
      * and creating one for each.
-     * @param event The recieved event.
+     * @param event The received event.
      */
     @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // Using this, will only execute the event listener once the post has been committed, avoiding constraint violations.
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // With this, the listener will only execute the event listener once the post has been committed, avoiding constraint violations.
     public void listenForPostCreatedAndGenerateFollowingFeed(PostCreatedEvent event) {
 
         List<Long> followerIds = followRepository.getIdsOfFollowers(event.user().getId());
