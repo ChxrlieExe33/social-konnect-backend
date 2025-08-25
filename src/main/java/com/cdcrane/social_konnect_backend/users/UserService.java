@@ -101,7 +101,7 @@ public class UserService implements UserUseCase {
                 .verificationCode(securityUtils.generateVerificationCode())
                 .build();
 
-        eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getVerificationCode()));
+        eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getUsername(), user.getVerificationCode()));
 
         return userRepository.save(user);
 
@@ -131,7 +131,7 @@ public class UserService implements UserUseCase {
             user.setVerificationCode(newCode);
             userRepository.save(user);
 
-            eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), newCode));
+            eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getUsername(),newCode));
 
             throw new InvalidVerificationCodeException("Invalid verification code, please try again. A new code has been sent to " + user.getEmail() + ".");
 

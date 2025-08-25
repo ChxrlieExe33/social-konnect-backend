@@ -49,7 +49,7 @@ public class AuthEventListener {
     @EventListener(VerificationCodeCreatedEvent.class)
     public void listenForVerificationCodeCreated(VerificationCodeCreatedEvent event) {
 
-        emailUseCase.sendVerificationEmail(event.getEmail(), event.getVerificationCode());
+        emailUseCase.sendVerificationEmailHtml(event.getEmail(), event.getUsername(), event.getVerificationCode());
 
     }
 

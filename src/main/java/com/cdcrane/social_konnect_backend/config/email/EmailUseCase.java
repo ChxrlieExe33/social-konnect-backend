@@ -4,4 +4,6 @@ public interface EmailUseCase {
 
     void sendVerificationEmail(String email, int verificationCode);
 
+    void sendVerificationEmailHtml(String email, String username, int verificationCode);
+
 }

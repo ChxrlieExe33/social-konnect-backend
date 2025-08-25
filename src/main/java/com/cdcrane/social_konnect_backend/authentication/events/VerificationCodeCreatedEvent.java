@@ -6,10 +6,12 @@ import lombok.Getter;
 public class VerificationCodeCreatedEvent {
 
     private final String email;
+    private final String username;
     private final int verificationCode;
 
-    public VerificationCodeCreatedEvent(String email, int verificationCode) {
+    public VerificationCodeCreatedEvent(String email, String username, int verificationCode) {
         this.email = email;
+        this.username = username;
         this.verificationCode = verificationCode;
     }
 

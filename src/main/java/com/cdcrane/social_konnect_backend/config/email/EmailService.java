@@ -69,4 +69,79 @@ public class EmailService implements EmailUseCase {
         return props;
     }
 
+    @Override
+    public void sendVerificationEmailHtml(String email, String username, int verificationCode) {
+
+
+        Properties props = prepareProperties();
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(senderEmail, senderPassword);
+            }
+        }
+        );
+
+        try {
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(senderEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+            message.setSubject("Social Konnect Verification Code");
+
+            String html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8">
+            </head>
+            <body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color: #ffffff;">
+              <table align="center" width="100%%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 40px 20px;">
+                    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%%;">
+                      <tr>
+                        <td align="center" style="font-size: 28px; font-weight: bold; color: #56A5FF; padding-bottom: 20px;">
+                          Social Konnect
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="font-size: 18px; padding-bottom: 15px;">
+                          Hello %s,
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="font-size: 18px; padding: 10px 20px; background-color: #f4f4f4; border-radius: 6px;">
+                          Your verification code is: <b style="font-size: 22px; color: #333;">%d</b>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td align="center" style="font-size: 14px; color: #888; padding-top: 20px;">
+                          This code will expire in 10 minutes.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """.formatted(username, verificationCode);
+
+            message.setContent(html, "text/html; charset=utf-8");
+
+            Transport.send(message);
+
+            log.info("Email sent to {}", email);
+
+        } catch (MessagingException e) {
+
+            throw new RuntimeException("Email failed to send to " + email + " ." + e);
+
+        }
+
+
+    }
+
 }

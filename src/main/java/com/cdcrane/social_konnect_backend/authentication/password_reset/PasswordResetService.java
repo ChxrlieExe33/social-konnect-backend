@@ -52,7 +52,7 @@ public class PasswordResetService implements PasswordResetUseCase {
         passwordResetRepository.save(reset);
 
         // Use non-async call since UX is not as important as on sign-up.
-        emailUseCase.sendVerificationEmail(user.getEmail(), reset.getResetCode());
+        emailUseCase.sendVerificationEmailHtml(user.getEmail(), user.getUsername(), reset.getResetCode());
 
         return reset.getId();
 
