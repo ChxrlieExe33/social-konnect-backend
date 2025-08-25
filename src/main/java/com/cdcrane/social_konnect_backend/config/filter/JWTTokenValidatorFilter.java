@@ -78,7 +78,7 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
             if (request.getRequestURI().equals(uri)){
                 return true;
             }
-            if (request.getRequestURI().startsWith("/media/") || request.getRequestURI().startsWith("/api/auth/exists/")) {
+            if (request.getRequestURI().startsWith("/media/") || request.getRequestURI().startsWith("/api/auth/exists/") || request.getRequestURI().startsWith("/api/auth/resetpassword/")) {
                 return true;
             }
         }

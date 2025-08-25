@@ -29,7 +29,7 @@ public class SecurityConfig {
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/verify",
-            "/api/auth/resetpassword",
+            "/api/auth/resetpassword/**",
             "/api/auth/resetpassword/verify",
             "/api/auth/resetpassword/submitnew",
             "/api/auth/exists/**",
