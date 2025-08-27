@@ -1,7 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
-import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
+import com.cdcrane.social_konnect_backend.authentication.events.RegisterVerificationCodeCreatedEvent;
 import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
@@ -326,11 +326,12 @@ class UserServiceTest {
         given(securityUtils.getCurrentAuth()).willReturn(currentUser);
 
         String newPass = "12345678";
+        String oldPass = "<PASSWORD>";
 
         given(passwordEncoder.matches(newPass, currentUser.getPassword())).willReturn(false);
 
         // When
-        underTest.changePassword(newPass);
+        underTest.changePassword(oldPass, newPass);
 
         // Then
         verify(userRepository).save(any());
@@ -345,11 +346,12 @@ class UserServiceTest {
         given(securityUtils.getCurrentAuth()).willReturn(currentUser);
 
         String newPass = "jndsnfsdnfkjsnf";
+        String oldPass = "jndsnfsdnfkjsnf";
 
         given(passwordEncoder.matches(newPass, currentUser.getPassword())).willReturn(true);
 
         // Then
-        assertThatThrownBy(() -> underTest.changePassword(newPass))
+        assertThatThrownBy(() -> underTest.changePassword(oldPass, newPass))
                 .isInstanceOf(UnableToChangePasswordException.class);
 
         verify(userRepository, never()).save(any(ApplicationUser.class));
@@ -535,7 +537,7 @@ class UserServiceTest {
 
         ApplicationUser result = userCaptor.getValue();
 
-        verify(eventPublisher).publishEvent(any(VerificationCodeCreatedEvent.class));
+        verify(eventPublisher).publishEvent(any(RegisterVerificationCodeCreatedEvent.class));
 
         assertThat(result.getUsername()).isEqualTo(dto.username());
         assertThat(result.getEmail()).isEqualTo(dto.email());

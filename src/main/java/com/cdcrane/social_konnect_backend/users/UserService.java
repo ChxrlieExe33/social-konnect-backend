@@ -1,7 +1,7 @@
 package com.cdcrane.social_konnect_backend.users;
 
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
-import com.cdcrane.social_konnect_backend.authentication.events.VerificationCodeCreatedEvent;
+import com.cdcrane.social_konnect_backend.authentication.events.RegisterVerificationCodeCreatedEvent;
 import com.cdcrane.social_konnect_backend.authentication.exception.InvalidVerificationCodeException;
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ActionNotPermittedException;
@@ -101,7 +101,7 @@ public class UserService implements UserUseCase {
                 .verificationCode(securityUtils.generateVerificationCode())
                 .build();
 
-        eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getUsername(), user.getVerificationCode()));
+        eventPublisher.publishEvent(new RegisterVerificationCodeCreatedEvent(user.getEmail(), user.getUsername(), user.getVerificationCode()));
 
         return userRepository.save(user);
 
@@ -131,7 +131,7 @@ public class UserService implements UserUseCase {
             user.setVerificationCode(newCode);
             userRepository.save(user);
 
-            eventPublisher.publishEvent(new VerificationCodeCreatedEvent(user.getEmail(), user.getUsername(),newCode));
+            eventPublisher.publishEvent(new RegisterVerificationCodeCreatedEvent(user.getEmail(), user.getUsername(), newCode));
 
             throw new InvalidVerificationCodeException("Invalid verification code, please try again. A new code has been sent to " + user.getEmail() + ".");
 
