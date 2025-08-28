@@ -107,6 +107,22 @@ public class UserService implements UserUseCase {
 
     }
 
+    @Override
+    @Transactional
+    public void sendVerificationCodeAgain(String username) {
+
+        ApplicationUser user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User with username " + username + " not found, cannot send verification code again."));
+
+        int newCode = securityUtils.generateVerificationCode();
+
+        user.setVerificationCode(newCode);
+
+        userRepository.save(user);
+
+        eventPublisher.publishEvent(new RegisterVerificationCodeCreatedEvent(user.getEmail(), user.getUsername(), newCode));
+
+    }
+
     /**
      * Method to check a user's verification code, for email verification.
      * @param username The username.

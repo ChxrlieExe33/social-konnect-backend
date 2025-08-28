@@ -13,6 +13,8 @@ public interface UserUseCase extends UserDetailsService {
 
     ApplicationUser registerUser(RegistrationDTO registration, boolean enabled);
 
+    void sendVerificationCodeAgain(String username);
+
     List<ApplicationUser> getAllUsers();
 
     ApplicationUser getUserByUsernameWithRoles(String username);

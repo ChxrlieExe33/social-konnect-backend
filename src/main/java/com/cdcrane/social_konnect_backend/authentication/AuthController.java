@@ -96,6 +96,15 @@ public class AuthController {
 
     }
 
+    @PostMapping("/send-code-again/{username}")
+    public ResponseEntity<Void> resendVerificationCode(@PathVariable String username){
+
+        userService.sendVerificationCodeAgain(username);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+
+    }
+
 
     /**
      * For authenticating existing users and providing a JWT in the Authorization header.
