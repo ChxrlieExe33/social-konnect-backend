@@ -33,6 +33,7 @@ public class ApplicationUser {
 
     private boolean enabled;
 
+    @Column(unique = true)
     private String email;
 
     private String bio;
