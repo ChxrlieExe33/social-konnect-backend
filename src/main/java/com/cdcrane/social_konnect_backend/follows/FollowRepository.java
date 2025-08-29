@@ -2,6 +2,7 @@ package com.cdcrane.social_konnect_backend.follows;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +23,21 @@ public interface FollowRepository extends JpaRepository<Follow, UUID> {
     void deleteByFollowerIdAndFollowedId(long followerId, long followedId);
 
     boolean existsByFollowerIdAndFollowedId(long followerId, long followedId);
+
+    /**
+     * Checks if the current user is following each of the users in the provided list
+     *
+     * @param currentUserId The ID of the current user
+     * @param targetUserIds List of user IDs to check if they are being followed
+     * @return List of DTOs containing each target user ID and a boolean indicating if they are being followed
+     */
+    @Query("SELECT new com.cdcrane.social_konnect_backend.follows.dto.FollowStatusDTO(u.id, " +
+            "CASE WHEN f.id IS NOT NULL THEN true ELSE false END) " +
+            "FROM ApplicationUser u LEFT JOIN Follow f ON f.followed.id = u.id AND f.follower.id = :currentUserId " +
+            "WHERE u.id IN :targetUserIds")
+    List<com.cdcrane.social_konnect_backend.follows.dto.FollowStatusDTO> checkFollowStatusForUsers(
+            @Param("currentUserId") long currentUserId,
+            @Param("targetUserIds") List<Long> targetUserIds);
+
 
 }

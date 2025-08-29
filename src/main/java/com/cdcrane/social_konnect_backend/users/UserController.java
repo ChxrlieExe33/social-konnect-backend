@@ -46,13 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/search/{username}")
-    public ResponseEntity<Page<UserSummaryDTO>> searchUsers(@PathVariable @NotBlank String username, Pageable pageable){
+    public ResponseEntity<Page<UserSearchResultDTO>> searchUsers(@PathVariable @NotBlank String username, Pageable pageable){
 
-        Page<ApplicationUser> users = userUseCase.searchUsersByUsername(username, pageable);
+        Page<UserSearchResultDTO> users = userUseCase.searchUsersByUsername(username, pageable);
 
-        var response = users.map(this::mapToUserSummary);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(users);
 
     }
 

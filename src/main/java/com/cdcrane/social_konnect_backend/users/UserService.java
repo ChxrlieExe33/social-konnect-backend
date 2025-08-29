@@ -9,13 +9,16 @@ import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundExce
 import com.cdcrane.social_konnect_backend.config.exceptions.UsernameNotValidException;
 import com.cdcrane.social_konnect_backend.config.file_handling.FileHandler;
 import com.cdcrane.social_konnect_backend.config.validation.TextInputValidator;
+import com.cdcrane.social_konnect_backend.follows.FollowRepository;
 import com.cdcrane.social_konnect_backend.follows.FollowUseCase;
+import com.cdcrane.social_konnect_backend.follows.dto.FollowStatusDTO;
 import com.cdcrane.social_konnect_backend.posts.PostUseCase;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.cdcrane.social_konnect_backend.roles.RoleRepository;
 import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException;
 import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserMetadataDTO;
+import com.cdcrane.social_konnect_backend.users.dto.UserSearchResultDTO;
 import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
@@ -33,6 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,9 +50,10 @@ public class UserService implements UserUseCase {
     private final FileHandler fileHandler;
     private final PostUseCase postUseCase;
     private final FollowUseCase followUseCase;
+    private final FollowRepository followRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher, FileHandler fileHandler, PostUseCase postUseCase, FollowUseCase followUseCase) {
+    public UserService(UserRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepo, SecurityUtils securityUtils, ApplicationEventPublisher eventPublisher, FileHandler fileHandler, PostUseCase postUseCase, FollowUseCase followUseCase, FollowRepository followRepository) {
         this.userRepository = userRepository;
         this.encoder = encoder;
         this.roleRepo = roleRepo;
@@ -57,6 +62,7 @@ public class UserService implements UserUseCase {
         this.fileHandler = fileHandler;
         this.postUseCase = postUseCase;
         this.followUseCase = followUseCase;
+        this.followRepository = followRepository;
     }
 
     @Override
@@ -159,13 +165,13 @@ public class UserService implements UserUseCase {
     }
 
     /**
-     * Get a page of users, searching by a username.
+     * Get a page of users, searching by a username. Also checks if the current user is following this user.
      * @param username The username to search by.
      * @param pageable The pagination data from the query params.
      * @return The page of users.
      */
     @Override
-    public Page<ApplicationUser> searchUsersByUsername(String username, Pageable pageable){
+    public Page<UserSearchResultDTO> searchUsersByUsername(String username, Pageable pageable){
 
         Page<ApplicationUser> users = userRepository.findByUsernameContainingIgnoreCase(username, pageable);
 
@@ -175,7 +181,23 @@ public class UserService implements UserUseCase {
 
         }
 
-        return users;
+        ApplicationUser currentUser = securityUtils.getCurrentAuth();
+
+        List<Long> userIds = users.stream().map(ApplicationUser::getId).toList();
+
+        List<FollowStatusDTO> followStatuses = followRepository.checkFollowStatusForUsers(currentUser.getId(), userIds);
+
+        Map<Long, Boolean> followStatusMap = followStatuses.stream()
+                .collect(Collectors.toMap(
+                        FollowStatusDTO::userId,
+                        FollowStatusDTO::isFollowing
+                ));
+
+        return users.map(user -> new UserSearchResultDTO(
+                user.getUsername(),
+                user.getProfilePictureUrl(),
+                followStatusMap.getOrDefault(user.getId(), false)
+        ));
     }
 
     /**

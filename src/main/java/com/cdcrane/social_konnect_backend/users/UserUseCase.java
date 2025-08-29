@@ -3,6 +3,7 @@ package com.cdcrane.social_konnect_backend.users;
 import com.cdcrane.social_konnect_backend.authentication.dto.RegistrationDTO;
 import com.cdcrane.social_konnect_backend.users.dto.ChangeBioAndPfpDTO;
 import com.cdcrane.social_konnect_backend.users.dto.UserMetadataDTO;
+import com.cdcrane.social_konnect_backend.users.dto.UserSearchResultDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,7 +36,7 @@ public interface UserUseCase extends UserDetailsService {
 
     boolean checkIfUsernameExists(String username);
 
-    Page<ApplicationUser> searchUsersByUsername(String username, Pageable pageable);
+    Page<UserSearchResultDTO> searchUsersByUsername(String username, Pageable pageable);
 
     ApplicationUser changeProfileData(ChangeBioAndPfpDTO dto);
 }
