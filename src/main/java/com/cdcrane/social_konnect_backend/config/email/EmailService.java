@@ -26,6 +26,9 @@ public class EmailService implements EmailUseCase {
     @Value("${spring.mail.port}")
     private int mailPort;
 
+    @Value("${app.frontend-base-url}")
+    private String baseUrl;
+
     private Properties prepareProperties() {
 
         Properties props = new Properties();
@@ -50,7 +53,7 @@ public class EmailService implements EmailUseCase {
                 }
         );
 
-        String verificationUrl = "http://localhost:4200/auth/register?username=" + username;
+        String verificationUrl = baseUrl + "/auth/register?username=" + username;
 
         try {
 
@@ -141,7 +144,7 @@ public class EmailService implements EmailUseCase {
                 }
         );
 
-        String verificationUrl = "http://localhost:4200/auth/forgot-password?reset-id=" + resetSessionId.toString();
+        String verificationUrl = baseUrl + "/auth/forgot-password?reset-id=" + username;
 
         try {
 

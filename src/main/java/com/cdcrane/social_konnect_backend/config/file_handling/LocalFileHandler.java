@@ -4,6 +4,7 @@ import com.cdcrane.social_konnect_backend.config.exceptions.FileTypeNotValidExce
 import com.cdcrane.social_konnect_backend.posts.post_media.PostMedia;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tika.Tika;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,6 +21,9 @@ import java.util.*;
 @Component
 @Slf4j
 public class LocalFileHandler implements FileHandler {
+
+    @Value("${app.backend-base-url}")
+    private String backendBaseUrl;
 
     /**
      * Take a list of MultipartFile, validate them, and call saveFile method to handle saving to the local filesystem.
@@ -44,8 +48,7 @@ public class LocalFileHandler implements FileHandler {
 
             Map<String, String> fileInfo = storeFile(file);
 
-            // TODO: Change this hardcoded URL to be created dynamically.
-            String fileUrl = "http://localhost:8080/media/" + fileInfo.get("filename");
+            String fileUrl = backendBaseUrl + "/media/" + fileInfo.get("filename");
 
 
             media.add(PostMedia.builder()
@@ -108,7 +111,7 @@ public class LocalFileHandler implements FileHandler {
             // Generate unique name even if files with same name are uploaded twice.
             String fileName = System.currentTimeMillis() + "_" + originalName;
 
-            // TODO: Create path to share static resources found in this directory.
+
             Path upload = Paths.get("uploads/", fileName);
 
             // Create dir if it doesn't exist
@@ -123,7 +126,6 @@ public class LocalFileHandler implements FileHandler {
 
         } catch (IOException e) {
 
-            // TODO: Create file upload failed exception and handler, which gives details on which files failed.
             throw new RuntimeException(e.toString());
         }
 
@@ -173,7 +175,6 @@ public class LocalFileHandler implements FileHandler {
             // Generate unique name even if files with same name are uploaded twice.
             String fileName = System.currentTimeMillis() + "_profile_picture_" + originalName;
 
-            // TODO: Create path to share static resources found in this directory.
             Path upload = Paths.get("uploads/", fileName);
 
             // Create dir if it doesn't exist
@@ -181,8 +182,7 @@ public class LocalFileHandler implements FileHandler {
 
             Files.copy(file.getInputStream(), upload, StandardCopyOption.REPLACE_EXISTING);
 
-            // TODO: Change this hardcoded URL to be created dynamically.
-            return "http://localhost:8080/media/" + fileName;
+            return backendBaseUrl + "/media/" + fileName;
 
 
         } catch (IOException e) {
