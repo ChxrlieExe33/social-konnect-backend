@@ -1,6 +1,9 @@
 package com.cdcrane.social_konnect_backend.users;
 
+import com.cdcrane.social_konnect_backend.comments.Comment;
+import com.cdcrane.social_konnect_backend.feeds.FollowingFeedItem;
 import com.cdcrane.social_konnect_backend.follows.Follow;
+import com.cdcrane.social_konnect_backend.likes.Like;
 import com.cdcrane.social_konnect_backend.posts.Post;
 import com.cdcrane.social_konnect_backend.roles.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -50,7 +53,6 @@ public class ApplicationUser {
     @JsonIgnoreProperties("users")
     private List<Role> roles;
 
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("user")
     private List<Post> posts;
@@ -60,6 +62,15 @@ public class ApplicationUser {
 
     @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE)
     private List<Follow> following;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<Like> likeHistory;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "feedOwner", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<FollowingFeedItem> followingFeed;
 
     @Column(name = "verification_code")
     private Integer verificationCode; // Must be Integer not int, since it can be null, int cannot contain null, if you try read from db to user, it will cause problem.
