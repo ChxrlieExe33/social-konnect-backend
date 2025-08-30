@@ -83,6 +83,11 @@ public class UserService implements UserUseCase {
     public ApplicationUser registerUser(RegistrationDTO registration, boolean enabled){
 
         boolean alreadyExists = userRepository.existsByUsername(registration.username());
+        boolean emailExists = userRepository.existsByEmail(registration.email());
+
+        if (emailExists){
+            throw new UsernameTakenException("Email " + registration.email() + " is already taken." + " Please choose a different email.");
+        }
 
         if (alreadyExists){
             throw new UsernameTakenException("Username " + registration.username() + " is already taken." + " Please choose a different username.");

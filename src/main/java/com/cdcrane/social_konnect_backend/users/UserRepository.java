@@ -29,6 +29,8 @@ public interface UserRepository extends JpaRepository<ApplicationUser, Long> {
 
     boolean existsByUsername(String username);
 
+    boolean existsByEmail(String email);
+
     Page<ApplicationUser> findByUsernameContainingIgnoreCase(String username, Pageable pageable);
 
     @Query("SELECT u.profilePictureUrl FROM ApplicationUser u WHERE u.username = ?1")
