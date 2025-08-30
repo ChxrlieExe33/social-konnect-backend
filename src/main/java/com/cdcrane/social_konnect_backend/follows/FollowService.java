@@ -1,11 +1,14 @@
 package com.cdcrane.social_konnect_backend.follows;
 
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
+import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserRepository;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -97,6 +100,36 @@ public class FollowService implements FollowUseCase {
         }
 
         followRepository.deleteByFollowerIdAndFollowedId(currentUser.getId(), targetUser.getId());
+
+    }
+
+    @Override
+    public Page<ApplicationUser> getMyFollowers(Pageable pageable) {
+
+        ApplicationUser me = securityUtils.getCurrentAuth();
+
+        Page<ApplicationUser> followers = followRepository.getFollowersByUserId(me.getId(), pageable);
+
+        if (followers.isEmpty()) {
+            throw new ResourceNotFoundException("No followers found for user " + me.getUsername());
+        }
+
+        return followers;
+
+    }
+
+    @Override
+    public Page<ApplicationUser> getMyFollowing(Pageable pageable) {
+
+        ApplicationUser me = securityUtils.getCurrentAuth();
+
+        Page<ApplicationUser> following = followRepository.getFollowingByUserId(me.getId(), pageable);
+
+        if (following.isEmpty()) {
+            throw new ResourceNotFoundException("No followed users found for user " + me.getUsername());
+        }
+
+        return following;
 
     }
 

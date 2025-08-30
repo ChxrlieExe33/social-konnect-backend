@@ -1,5 +1,9 @@
 package com.cdcrane.social_konnect_backend.follows;
 
+import com.cdcrane.social_konnect_backend.users.ApplicationUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 public interface FollowUseCase {
 
     int getFollowerCountByUserId(long userId);
@@ -11,5 +15,9 @@ public interface FollowUseCase {
     void followUser(String username);
 
     void unfollowUser(String username);
+
+    Page<ApplicationUser> getMyFollowers(Pageable pageable);
+
+    Page<ApplicationUser> getMyFollowing(Pageable pageable);
 
 }
