@@ -408,4 +408,14 @@ public class UserService implements UserUseCase {
 
     }
 
+    @Override
+    @Transactional
+    public void deleteCurrentUserAccount() {
+
+        ApplicationUser user = securityUtils.getCurrentAuth();
+
+        userRepository.delete(user);
+
+    }
+
 }

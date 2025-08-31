@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -127,6 +128,16 @@ public class UserController {
         return ResponseEntity.ok().build();
 
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteCurrentUser(){
+
+        userUseCase.deleteCurrentUserAccount();
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+    }
+
 
     // --------------------------------- HELPER METHODS ---------------------------------
 

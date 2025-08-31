@@ -39,4 +39,6 @@ public interface UserUseCase extends UserDetailsService {
     Page<UserSearchResultDTO> searchUsersByUsername(String username, Pageable pageable);
 
     ApplicationUser changeProfileData(ChangeBioAndPfpDTO dto);
+
+    void deleteCurrentUserAccount();
 }
