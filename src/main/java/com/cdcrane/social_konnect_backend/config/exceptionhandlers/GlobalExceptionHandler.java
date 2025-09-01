@@ -14,6 +14,7 @@ import com.cdcrane.social_konnect_backend.roles.exceptions.RoleNotFoundException
 import com.cdcrane.social_konnect_backend.users.exceptions.UnableToChangePasswordException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import com.cdcrane.social_konnect_backend.users.exceptions.UsernameTakenException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     // -------------------- GENERIC EXCEPTIONS --------------------
@@ -39,12 +41,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionErrorResponse> handleException(Exception ex) {
 
         ExceptionErrorResponse error = ExceptionErrorResponse.builder()
-                .message(ex.getMessage())
-                .responseCode(HttpStatus.BAD_REQUEST.value())
+                .message("Unknown error occurred. Please contact the developer for assistance.")
+                .responseCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .timestamp(System.currentTimeMillis())
                 .build();
 
-        System.err.println("Generic error triggered: " + ex.toString());
+        log.error("Generic error triggered: {}", ex.toString());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
@@ -84,6 +86,8 @@ public class GlobalExceptionHandler {
                 .timestamp(System.currentTimeMillis())
                 .build();
 
+        log.warn("Username taken exception triggered: {}", ex.toString());
+
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
@@ -114,9 +118,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
     }
-
-    // TODO: Create handler for ConstraintViolationException (for when you use validation annotations directly in the controller
-    //                                                       parameters instead of in the DTO, like you would to validate a path variable)
 
     /**
      * Handle errors where the specified user account was not found.
@@ -168,6 +169,8 @@ public class GlobalExceptionHandler {
                 .timestamp(System.currentTimeMillis())
                 .build();
 
+        log.warn("File type not valid exception triggered: {}", ex.toString());
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
 
     }
@@ -185,6 +188,8 @@ public class GlobalExceptionHandler {
                 .responseCode(HttpStatus.FORBIDDEN.value())
                 .timestamp(System.currentTimeMillis())
                 .build();
+
+        log.warn("Action not permitted exception triggered: {}", ex.toString());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
@@ -245,8 +250,8 @@ public class GlobalExceptionHandler {
 
     /**
      * Handle bad password reset attempts.
-     * @param ex
-     * @return
+     * @param ex The password reset failed exception.
+     * @return A response entity with the error.
      */
     @ExceptionHandler(ResetInvalidException.class)
     public ResponseEntity<ExceptionErrorResponse> handleResetInvalidException(ResetInvalidException ex) {

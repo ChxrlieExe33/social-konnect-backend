@@ -53,8 +53,6 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            log.info("User {} authenticated with JWT token.", username);
-
         } else {
 
             throw new BadCredentialsException("Invalid JWT token, must follow 'Bearer <token>' format.");

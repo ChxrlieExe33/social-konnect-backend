@@ -10,6 +10,7 @@ import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserUseCase;
 import com.cdcrane.social_konnect_backend.users.dto.UserSummaryDTO;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -69,6 +71,8 @@ public class AuthController {
 
         ApplicationUser user = userService.registerUser(registerDTO, false);
 
+        log.info("User registered with ID {} and username {}", user.getId(), user.getUsername());
+
         return ResponseEntity.ok().body(new RegistrationResponseDTO(user.getId(), user.getUsername(), user.getEmail(), user.isEnabled()));
 
     }
@@ -91,6 +95,8 @@ public class AuthController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
+
+        log.info("User {} with ID {} verified successfully.", user.getUsername(), user.getId());
 
         return ResponseEntity.ok().headers(headers).body(response);
 
@@ -126,9 +132,13 @@ public class AuthController {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + data.token());
 
+            log.info("User {} logged in successfully.", data.username());
+
             return ResponseEntity.ok().headers(headers).body(new LoginResponseDTO("Authentication successful", data.username(), data.expirationDate()));
 
         } catch (AuthenticationException e) {
+
+            log.warn("Authentication failed for user {}", loginDTO.username());
 
             throw new BadCredentialsException("Invalid username or password provided.");
 
@@ -159,6 +169,8 @@ public class AuthController {
 
         UUID resetId = passwordResetUseCase.sendPasswordResetEmail(username);
 
+        log.info("Password reset request submitted for user {}", username);
+
         return ResponseEntity.ok(new PasswordResetRequestResponseDTO(resetId, "Password reset email sent."));
 
     }
@@ -168,6 +180,8 @@ public class AuthController {
 
         passwordResetUseCase.checkResetCode(submitResetCodeDTO.resetId(), submitResetCodeDTO.resetCode());
 
+        log.info("Forgot password reset code verified for reset session {}", submitResetCodeDTO.resetId());
+
         return ResponseEntity.ok(new PasswordResetRequestResponseDTO(submitResetCodeDTO.resetId(), "Password reset code verified. Send new password to /auth/resetpassword/submitnew"));
 
     }
@@ -176,6 +190,8 @@ public class AuthController {
     public ResponseEntity<PasswordResetFinalResponse> submitNewPassword(@RequestBody SubmitNewPasswordDTO submitNewPasswordDTO){
 
         passwordResetUseCase.resetPassword(submitNewPasswordDTO.resetId(), submitNewPasswordDTO.newPassword());
+
+        log.info("New password submitted for reset session {}", submitNewPasswordDTO.resetId());
 
         return ResponseEntity.ok(new PasswordResetFinalResponse("Password reset completed. You may now login with your new password."));
 
