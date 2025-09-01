@@ -2,6 +2,7 @@
 # --------------------------
 # Build the image, then when running the image as a container, go through the .env.example
 # and pass each one as an env variable with -e or adding them to the "environment" section of the service.
+# Also you will want to create a volume to the /uploads folder to have access to the uploaded media.
 
 # Stage 1: Build stage
 FROM eclipse-temurin:24-jdk AS build

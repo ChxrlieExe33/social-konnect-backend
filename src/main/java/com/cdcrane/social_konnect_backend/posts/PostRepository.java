@@ -60,4 +60,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     """)
     PostLikeStatusDTO findLikeStatusByPostId(@Param("postId") UUID postId, @Param("userId") Long userId);
 
+    @Query("SELECT p FROM Post p WHERE p.user.id = ?1 ORDER BY p.postedAt DESC")
+    List<Post> getXRecentPostsByUsername(long userId, Pageable pageable);
+
 }

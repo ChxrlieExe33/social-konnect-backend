@@ -2,11 +2,14 @@ package com.cdcrane.social_konnect_backend.follows;
 
 import com.cdcrane.social_konnect_backend.config.SecurityUtils;
 import com.cdcrane.social_konnect_backend.config.exceptions.ResourceNotFoundException;
+import com.cdcrane.social_konnect_backend.follows.events.UserFollowedEvent;
+import com.cdcrane.social_konnect_backend.follows.events.UserUnfollowedEvent;
 import com.cdcrane.social_konnect_backend.users.ApplicationUser;
 import com.cdcrane.social_konnect_backend.users.UserRepository;
 import com.cdcrane.social_konnect_backend.users.exceptions.UserNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,12 +20,14 @@ public class FollowService implements FollowUseCase {
     private final FollowRepository followRepository;
     private final SecurityUtils securityUtils;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public FollowService(FollowRepository followRepository, SecurityUtils securityUtils, UserRepository userRepository) {
+    public FollowService(FollowRepository followRepository, SecurityUtils securityUtils, UserRepository userRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.followRepository = followRepository;
         this.securityUtils = securityUtils;
         this.userRepository = userRepository;
+        this.eventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -80,6 +85,8 @@ public class FollowService implements FollowUseCase {
 
         followRepository.save(follow);
 
+        eventPublisher.publishEvent(new UserFollowedEvent(currentUser.getId(), targetUser.getId()));
+
     }
 
     /**
@@ -100,6 +107,8 @@ public class FollowService implements FollowUseCase {
         }
 
         followRepository.deleteByFollowerIdAndFollowedId(currentUser.getId(), targetUser.getId());
+
+        eventPublisher.publishEvent(new UserUnfollowedEvent(currentUser.getId(), targetUser.getId()));
 
     }
 
