@@ -1,6 +1,7 @@
 package com.cdcrane.social_konnect_backend.likes;
 
 import com.cdcrane.social_konnect_backend.likes.dto.LikeCountDTO;
+import com.cdcrane.social_konnect_backend.users.dto.UsernameAndPfpDTO;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,9 +42,9 @@ public class LikeController {
     }
 
     @GetMapping("/users/{postId}")
-    public ResponseEntity<Page<String>> getUsernamesWhoLikePost(@PathVariable @NotNull UUID postId, Pageable pageable){
+    public ResponseEntity<Page<UsernameAndPfpDTO>> getUsernamesWhoLikePost(@PathVariable @NotNull UUID postId, Pageable pageable){
 
-        Page<String> users = likeUseCase.getUsernamesWhoLikePost(postId, pageable);
+        Page<UsernameAndPfpDTO> users = likeUseCase.getUsernamesWhoLikePost(postId, pageable);
 
         return ResponseEntity.ok(users);
 

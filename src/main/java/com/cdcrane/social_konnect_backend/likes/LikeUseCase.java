@@ -1,9 +1,9 @@
 package com.cdcrane.social_konnect_backend.likes;
 
+import com.cdcrane.social_konnect_backend.users.dto.UsernameAndPfpDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Set;
 import java.util.UUID;
 
 public interface LikeUseCase {
@@ -14,6 +14,6 @@ public interface LikeUseCase {
 
     int getLikeCountByPostId(UUID postId);
 
-    Page<String> getUsernamesWhoLikePost(UUID postId, Pageable pageable);
+    Page<UsernameAndPfpDTO> getUsernamesWhoLikePost(UUID postId, Pageable pageable);
 
 }

@@ -18,7 +18,6 @@ public interface LikeRepository extends JpaRepository<Like, UUID> {
 
     Optional<Like> findByPostIdAndUserId(UUID postId, long userId);
 
-    @Query("SELECT l.user.username FROM Like l WHERE l.post.id = ?1")
-    Page<String> getUsernamesWhoLikePost(UUID postId, Pageable pageable);
+    Page<Like> findByPostId(UUID postId, Pageable pageable);
 
 }
