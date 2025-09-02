@@ -1,30 +1,33 @@
+<img src="/social-konnect-ui.png" alt="Social Konnect UI" style="margin-top: 10px;">
+
 # SocialKonnect Backend
 
-**SocialKonnect** is a social media-style application I'm creating to teach myself **Spring Boot** and **Angular**.
+This is a personal project I have been building out for a couple of months to learn Spring Boot & Angular while creating a reasonably complex application.
 
-This repository holds the backend of the application.
+It is a Social media style application, like Twitter in some ways, it includes User profiles, posts, comments and likes, as well as the logic for users following each other.
 
-The technologies I'm using to build it are the following:
+This project is built on Spring Boot version 3.5.3.
 
-- PostgreSQL
-- Spring Data JPA
-- Spring Security
-- ...
+During the development of this codebase, I implemented many things such as:
 
-## Main Goals for the Project
-
-- Have full stateless JWT based authentication and authorization.
-- Should follow typical social media functionality.
-- Users can have posts.
-- Posts can have comments and likes.
-- Users can customize their profile and update/delete posts.
-- Users can follow other users.
-- Will have a "for you" page with recommended posts.
-- Post media (images / videos) are stored locally currently, but later I want to create an implementation using AWS S3.
-- Create a set of routes for administrators, only available to users with the 'admin' role.
-- Correct exception handling.
-- Protect against common web attacks such as CSRF, SSRF, LFI, RCE, etc.
-
+- _Security_
+  - Full **JWT authentication** using Spring Security.
+  - User registration including email sending for verification.
+  - Forgot password functionality, which sends an email to the user.
+  - CORS Configuration.
+  - Submitted text validation, to **block malicious HTML** payloads, therefore **avoiding XSS**. 
+- _Data and performance_
+  - DTO Projections for only fetching necessary data in complex JPA queries.
+  - **Asynchronous event listeners** for performing tasks in the background to avoid blocking the response to the user.
+  - User **following-feed generation** using **fan-out write**, which works better for read-intensive applications like this.
+- _Files_
+  - File upload functionality for posts including mime type checking with Apache Tika to block malicious file types.
+  - File cleanup after posts are deleted.
+- _General_
+  - Usage of the **DTO Pattern** to only return relevant data to the user.
+  - Global **exception handling** for correct error payloads and to **avoid information exposure.**
+  - Proper usage of **Inversion of Dependencies** for scalability and testing
+  - **Unit tests** using JUnit5 and Mockito for many core functionalities.
 
 ## How to run this project locally
 
@@ -52,11 +55,11 @@ Then finally **run it with maven**, this will install the necessary dependencies
 ./mvnw spring-boot:run
 ```
 
-Alternatively, you could **import the project** in your IDE of choice and make sure the JDK is set correctly, then run normally.
+**Alternatively**, you could **import the project** in your IDE of choice and make sure the JDK is set correctly, then run normally.
 
 ## Run it as a docker container
 
-If you simply want to use the application without installing Java, you can run it as a docker container
+If you simply want to use the application without installing Java, you can run it as a docker container.
 
 First build it:
 
@@ -64,7 +67,7 @@ First build it:
 docker build . -t social-konnect-backend
 ```
 
-Then you can run the image as a container, don't forget to add the environment variables which are in the .env.example, like so:
+After that, you can run the image as a container, remember to add the environment variables, which are in the .env.example, like so:
 
 ```cmd
 docker run -p 8080:8080 social-konnect-backend -e DATABASE_URL=jdbc:postgresql://localhost:5432/your_database -e DATABASE_USER=your_username etc.
