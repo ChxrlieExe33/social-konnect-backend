@@ -4,6 +4,7 @@ import com.cdcrane.social_konnect_backend.authentication.JWTUtil;
 import com.cdcrane.social_konnect_backend.config.exceptionhandlers.CustomAccessDeniedHandler;
 import com.cdcrane.social_konnect_backend.config.exceptionhandlers.CustomAuthEntryPoint;
 import com.cdcrane.social_konnect_backend.config.filter.JWTTokenValidatorFilter;
+import com.cdcrane.social_konnect_backend.config.filter.RateLimiterFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ public class SecurityConfig {
 
     private final JWTUtil jwtUtil;
     private final CorsConfig corsConfig;
+    private final RateLimiterFilter rateLimiterFilter;
 
     public static final String[] PUBLIC_URIS = {
             "/error",
@@ -38,9 +40,10 @@ public class SecurityConfig {
     };
 
     @Autowired
-    public SecurityConfig(JWTUtil jwtUtil, CorsConfig corsConfig) {
+    public SecurityConfig(JWTUtil jwtUtil, CorsConfig corsConfig, RateLimiterFilter rateLimiterFilter) {
         this.jwtUtil = jwtUtil;
         this.corsConfig = corsConfig;
+        this.rateLimiterFilter = rateLimiterFilter;
     }
 
     @Bean
@@ -58,6 +61,7 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
+        http.addFilterBefore(rateLimiterFilter, ExceptionTranslationFilter.class);
         http.addFilterAfter(new JWTTokenValidatorFilter(jwtUtil), ExceptionTranslationFilter.class);
 
         // Exception handling for AuthenticationExceptions and AccessDeniedExceptions.
